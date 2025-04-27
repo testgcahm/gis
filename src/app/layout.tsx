@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Gujranwala Medical College Islamic Society",
-  description: "Official website of the Gujranwala Medical College Islamic Society",
+  description: "Connecting students and faculty through faith, service, and community at Gujranwala Medical College.",
   keywords: ["GMC", "Islamic Society", "Medical College", "Gujranwala", "Society"],
   icons: {
     icon: '/logo.ico',
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://gmcis.vercel.app", // Update to your actual site URL if different
+    url: "https://gmc-islamic-society.vercel.app/", // Update to your actual site URL if different
     title: "Gujranwala Medical College Islamic Society",
-    description: "Official website of the Gujranwala Medical College Islamic Society",
+    description: "Connecting students and faculty through faith, service, and community at Gujranwala Medical College.",
     siteName: "GMC Islamic Society",
     images: [
       {
