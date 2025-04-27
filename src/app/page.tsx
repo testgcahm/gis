@@ -5,6 +5,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
+// Animation variants for parent and children
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+};
+const childVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7 } },
+};
+
 // Custom hook to detect if an element is in view
 function useInView<T extends HTMLElement = HTMLElement>(threshold = 0.2): [React.RefObject<T | null>, boolean] {
   const ref = useRef<T | null>(null);
@@ -47,46 +63,39 @@ export default function Home() {
           />
           <div className="inset-0 bg-black/50 w-full h-full absolute top-0 left-0 pointer-events-none" />
         </motion.div>
-        <div className="text-center px-4 flex flex-col items-center justify-center h-full w-full">
+        <div className="text-center px-4 z-50 flex flex-col items-center justify-center h-full w-full">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: heroInView ? 1 : 0, y: heroInView ? 0 : 40 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className={`transition-all duration-700 delay-300 transform ${heroInView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+            variants={containerVariants}
+            initial="hidden"
+            animate={heroInView ? 'show' : 'hidden'}
+            className="flex flex-col items-center w-full"
           >
-            <Image
-              src="/logo.png"
-              alt="GIS Logo"
-              width={180}
-              height={180}
-              className="mx-auto mb-6"
-            />
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: heroInView ? 1 : 0, y: heroInView ? 0 : 40 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className={`text-4xl md:text-6xl font-bold text-white mb-4 transition-all duration-700 delay-500 transform ${heroInView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
-          >
-            GMC Islamic Society
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="text-3xl xs:text-4xl z-50 sm:text-6xl font-bold text-secondary-400 mb-8 transition-all duration-700 delay-500 transform"
-          >
-            Coming Soon
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: heroInView ? 1 : 0, y: heroInView ? 0 : 40 }}
-            transition={{ duration: 0.7, delay: 0.9 }}
-            className={`transition-all duration-700 delay-900 transform ${heroInView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
-          >
-            <Link href="/contact" className="bg-secondary hover:bg-logo-tertiary text-primary-800  font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 transform">
-              Get in Touch
-            </Link>
+            <motion.div variants={childVariants}>
+              <Image
+                src="/logo.png"
+                alt="GIS Logo"
+                width={180}
+                height={180}
+                className="mx-auto mb-6"
+              />
+            </motion.div>
+            <motion.h1
+              variants={childVariants}
+              className="text-4xl md:text-6xl font-bold text-white mb-4"
+            >
+              GMC Islamic Society
+            </motion.h1>
+            <motion.p
+              variants={childVariants}
+              className="text-3xl xs:text-4xl sm:text-6xl font-bold text-secondary-400 mb-10"
+            >
+              Coming Soon
+            </motion.p>
+            <motion.div variants={childVariants}>
+              <Link href="/contact" className="bg-secondary hover:bg-logo-tertiary text-primary-800  font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 transform">
+                Get in Touch
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
       </section>
