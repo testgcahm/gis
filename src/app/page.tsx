@@ -36,7 +36,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: heroInView ? 1 : 0 }}
           transition={{ duration: 1 }}
-          className={`inset-0 transition-opacity duration-1000 ${heroInView ? 'opacity-100' : 'opacity-0'} w-full h-full absolute top-[82px] left-0`}
+          className={`inset-0 transition-opacity z-0 duration-1000 ${heroInView ? 'opacity-100' : 'opacity-0'} w-full h-full absolute top-[82px] left-0`}
         >
           <Image
             src="/background.jpg"
@@ -71,9 +71,10 @@ export default function Home() {
             GMC Islamic Society
           </motion.h1>
           <motion.p
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.5 }}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="text-3xl xs:text-4xl z-50 sm:text-6xl font-bold text-secondary-400 mb-8 transition-all duration-700 delay-500 transform"
           >
             Coming Soon
           </motion.p>
@@ -83,7 +84,7 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.9 }}
             className={`transition-all duration-700 delay-900 transform ${heroInView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
-            <Link href="/contact" className="bg-secondary hover:bg-secondary-500 text-primary-700 font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 transform">
+            <Link href="/contact" className="bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-700)] text-[var(--color-primary-900)] font-bold py-3 px-8 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:ring-4 hover:ring-[var(--color-primary-200)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary-400)]">
               Get in Touch
             </Link>
           </motion.div>
