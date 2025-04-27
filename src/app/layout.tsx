@@ -14,6 +14,22 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logo.ico',
   },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://gmcis.vercel.app", // Update to your actual site URL if different
+    title: "Gujranwala Medical College Islamic Society",
+    description: "Official website of the Gujranwala Medical College Islamic Society",
+    siteName: "GMC Islamic Society",
+    images: [
+      {
+        url: "/logo.png", // Ensure this image exists in your public folder
+        width: 1200,
+        height: 630,
+        alt: "GMCIS - Gujranwala Medical College Islamic Society",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
