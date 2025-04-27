@@ -24,3 +24,71 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@theme {
+
+  --breakpoint-xs: 320px;
+
+  /* Colors of various range in hex for three colors purple, yellow and white, name them as primary, secondary and tertiary */
+  --color-primary-50: #e6e6fa;
+  --color-primary-100: #d0d0e6;
+  --color-primary-200: #b3b3d9;
+  --color-primary-300: #9999cc;
+  --color-primary-400: #7f7fb3;
+  --color-primary-500: #666699;
+  --color-primary-600: #4c4c80;
+  --color-primary-700: #333366;
+  --color-primary-800: #19194d;
+  --color-primary-900: #000033;
+  --color-primary: #6a5acd;
+  --color-secondary-50: #fff9e6;
+  --color-secondary-100: #fff3cc;
+  --color-secondary-200: #ffe6b3;
+  --color-secondary-300: #ffdb99;
+  --color-secondary-400: #ffd280;
+  --color-secondary-500: #ffcc66;
+  --color-secondary-600: #ffbf4d;
+  --color-secondary-700: #ffb33d;
+  --color-secondary-800: #ffa52e;
+  --color-secondary-900: #ff9800;
+  --color-secondary: #ffcc00;
+  --color-tertiary-50: #ffffff;
+  --color-tertiary-100: #f2f2f2;
+  --color-tertiary-200: #e6e6e6;
+  --color-tertiary-300: #d9d9d9;
+  --color-tertiary-400: #cccccc;
+  --color-tertiary-500: #bfbfbf;
+  --color-tertiary-600: #b3b3b3;
+  --color-tertiary-700: #a6a6a6;
+  --color-tertiary-800: #999999;
+  --color-tertiary-900: #8c8c8c;
+  --color-tertiary: #cccccc;
+  --color-logo-primary: #5d2d92;
+  --color-logo-secondary: #22316e;
+  --color-logo-tertiary: #fcb20a;
+  --color-logo-quaternary: #df911a
+}
+
+button {
+  cursor: pointer;
+}
+
+@layer utilities {
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: theme(--color-primary-200);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: theme(--color-primary-600);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme(--color-primary-700);
+  }
+}
