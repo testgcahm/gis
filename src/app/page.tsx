@@ -84,7 +84,7 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.9 }}
             className={`transition-all duration-700 delay-900 transform ${heroInView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
           >
-            <Link href="/contact" className="bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-700)] text-[var(--color-primary-900)] font-bold py-3 px-8 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:ring-4 hover:ring-[var(--color-primary-200)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary-400)]">
+            <Link href="/contact" className="bg-secondary hover:bg-logo-tertiary text-primary-800  font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 transform">
               Get in Touch
             </Link>
           </motion.div>
