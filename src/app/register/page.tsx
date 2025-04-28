@@ -20,8 +20,9 @@ const Register: React.FC = () => {
         cnic: '',
         category: '',
         institute: '',
-        fileUrl: '',
+        fileUrl: '', // will hold the uploaded image URL
     });
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [errors, setErrors] = useState({
         name: false,
         father: false,
@@ -30,6 +31,7 @@ const Register: React.FC = () => {
         category: false,
         institute: false,
         fileUrl: false,
+        imageFile: false,
     });
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -45,6 +47,24 @@ const Register: React.FC = () => {
         setErrors({ ...errors, [e.target.name]: false });
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+            setErrors((prev) => ({ ...prev, imageFile: true }));
+            setImageFile(null);
+            return;
+        }
+        if (file.size > 250 * 1024) {
+            setErrors((prev) => ({ ...prev, imageFile: true }));
+            setImageFile(null);
+            return;
+        }
+        setImageFile(file);
+        setErrors((prev) => ({ ...prev, imageFile: false }));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -56,7 +76,8 @@ const Register: React.FC = () => {
             cnic: formData.cnic.trim() === '',
             category: formData.category === '',
             institute: formData.institute.trim() === '',
-            fileUrl: formData.fileUrl.trim() === '',
+            fileUrl: false,
+            imageFile: !imageFile,
         };
 
         if (Object.values(newErrors).some((error) => error)) {
@@ -65,7 +86,25 @@ const Register: React.FC = () => {
             return;
         }
 
-        const formUrl = `${GOOGLE_FORM_URL}?${ENTRY_NAME}=${encodeURIComponent(formData.name)}&${ENTRY_FATHER}=${encodeURIComponent(formData.father)}&${ENTRY_GENDER}=${encodeURIComponent(formData.gender)}&${ENTRY_CNIC}=${encodeURIComponent(formData.cnic)}&${ENTRY_CATEGORY}=${encodeURIComponent(formData.category)}&${ENTRY_INSTITUTE}=${encodeURIComponent(formData.institute)}&${ENTRY_FILE_URL}=${encodeURIComponent(formData.fileUrl)}`;
+        // Upload image to local API route
+        let imageUrl = '';
+        try {
+            const form = new FormData();
+            form.append('image', imageFile!);
+            const res = await fetch('/api/imgur-upload', {
+                method: 'POST',
+                body: form,
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error('Image upload failed');
+            imageUrl = data.url;
+        } catch (err) {
+            setErrors((prev) => ({ ...prev, imageFile: true }));
+            setLoading(false);
+            return;
+        }
+
+        const formUrl = `${GOOGLE_FORM_URL}?${ENTRY_NAME}=${encodeURIComponent(formData.name)}&${ENTRY_FATHER}=${encodeURIComponent(formData.father)}&${ENTRY_GENDER}=${encodeURIComponent(formData.gender)}&${ENTRY_CNIC}=${encodeURIComponent(formData.cnic)}&${ENTRY_CATEGORY}=${encodeURIComponent(formData.category)}&${ENTRY_INSTITUTE}=${encodeURIComponent(formData.institute)}&${ENTRY_FILE_URL}=${encodeURIComponent(imageUrl)}`;
 
         try {
             await fetch(formUrl, {
@@ -74,6 +113,7 @@ const Register: React.FC = () => {
             });
             setSuccessMessage('Registration submitted successfully!');
             setFormData({ name: '', father: '', gender: '', cnic: '', category: '', institute: '', fileUrl: '' });
+            setImageFile(null);
             setTimeout(() => setSuccessMessage(null), 3000);
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -215,17 +255,31 @@ const Register: React.FC = () => {
                             {errors.institute && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Institute name is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-520 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Upload File URL <span className="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                name="fileUrl"
-                                value={formData.fileUrl}
-                                onChange={handleChange}
-                                className={`w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 ${errors.fileUrl ? 'border-red-500' : 'border-gray-300'}`}
-                                placeholder="Paste your file URL here"
-                                required
-                            />
-                            {errors.fileUrl && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">File URL is required.</p>}
+                            <label className="block text-primary font-semibold mb-1">Upload Image <span className="text-red-500">*</span></label>
+                            <div className="relative w-full">
+                                <input
+                                    id="image-upload"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg"
+                                    onChange={handleImageChange}
+                                    className="hidden"
+                                    required
+                                />
+                                <label htmlFor="image-upload" className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
+                                    {imageFile ? imageFile.name : 'Click to select image (jpg, jpeg, png)'}
+                                </label>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">
+                                Max size: 250KB. Supported formats: jpg, jpeg, png
+                            </p>
+                            <p className="text-xs text-gray-600 mt-1">
+                                If your image is too large, compress it at <a href="https://imagecompressor.11zon.com/en/image-compressor/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this link</a>.
+                            </p>
+                            {errors.imageFile && (
+                                <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">
+                                    Please upload a valid image (max 250KB, jpg/jpeg/png).
+                                </p>
+                            )}
                         </div>
                         <div className={`transition-all duration-500 delay-540 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                             <button
