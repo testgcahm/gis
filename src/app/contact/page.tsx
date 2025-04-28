@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-const GOOGLE_FORM_URL = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL;
+const GOOGLE_FORM_URL = process.env.NEXT_PUBLIC_GOOGLE_FORM_CONTACT_URL;
 const ENTRY_NAME = "entry.780881885";
 const ENTRY_EMAIL = "entry.117990330";
 const ENTRY_MESSAGE = "entry.438681110";
