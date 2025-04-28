@@ -75,7 +75,7 @@ const Contact: React.FC = () => {
                 )}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className={`transition-all duration-500 delay-400 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                        <label className="block text-[#552e91] font-semibold mb-1">Name</label>
+                        <label className="block text-[#552e91] font-semibold mb-1">Name <span className="text-red-500">*</span></label>
                         <input 
                             type="text" 
                             name="name" 
@@ -88,7 +88,7 @@ const Contact: React.FC = () => {
                         {errors.name && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Name is required.</p>}
                     </div>
                     <div className={`transition-all duration-500 delay-500 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                        <label className="block text-[#552e91] font-semibold mb-1">Email</label>
+                        <label className="block text-[#552e91] font-semibold mb-1">Email <span className="text-red-500">*</span></label>
                         <input 
                             type="email" 
                             name="email" 
@@ -101,7 +101,7 @@ const Contact: React.FC = () => {
                         {errors.email && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Valid email is required.</p>}
                     </div>
                     <div className={`transition-all duration-500 delay-600 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                        <label className="block text-[#552e91] font-semibold mb-1">Message</label>
+                        <label className="block text-[#552e91] font-semibold mb-1">Message <span className="text-red-500">*</span></label>
                         <textarea 
                             name="message" 
                             value={formData.message} 

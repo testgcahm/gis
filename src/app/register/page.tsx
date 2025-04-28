@@ -129,13 +129,13 @@ const Register: React.FC = () => {
                         </div>
                     </div>
                     <p className="mt-6 text-center text-lg font-bold text-primary-700 bg-secondary/20 rounded-lg px-4 py-2 shadow-sm">
-                        Ready to join? <span className="text-secondary">Register by filling out the form below!</span>
+                        Ready to join? <span className="text-secondary">Register by filling out this form!</span>
                     </p>
                 </div>
                 <div className={`bg-white shadow-[2px_2px_8px_2px_rgba(102,102,153,0.3)] w-full min-[975px]:min-w-[520px] max-[975px]:max-w-[750px] border border-primary-300 p-8 rounded-2xl transition-all duration-700 delay-300 transform ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'} flex justify-center`}>
                     <form onSubmit={handleSubmit} className="space-y-4 w-full">
                         <div className={`transition-all duration-500 delay-400 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Name</label>
+                            <label className="block text-primary font-semibold mb-1">Name <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 name="name"
@@ -148,7 +148,7 @@ const Register: React.FC = () => {
                             {errors.name && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Name is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-420 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Father's Name</label>
+                            <label className="block text-primary font-semibold mb-1">Father's Name <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 name="father"
@@ -161,21 +161,21 @@ const Register: React.FC = () => {
                             {errors.father && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Father's name is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-440 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Gender</label>
+                            <label className="block text-primary font-semibold mb-1">Gender <span className="text-red-500">*</span></label>
                             <div className="flex flex-col">
                                 <label className="inline-flex items-center">
-                                    <input type="radio" name="gender" value="Male" checked={formData.gender === 'Male'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-0 ring-0 outline-none" />
+                                    <input type="radio" name="gender" value="Male" checked={formData.gender === 'Male'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
                                     <span className="ml-2">Male</span>
                                 </label>
                                 <label className="inline-flex items-center">
-                                    <input type="radio" name="gender" value="Female" checked={formData.gender === 'Female'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-0 ring-0 outline-none" />
+                                    <input type="radio" name="gender" value="Female" checked={formData.gender === 'Female'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
                                     <span className="ml-2">Female</span>
                                 </label>
                             </div>
                             {errors.gender && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Gender is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-460 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">CNIC (National Identity Card Number)</label>
+                            <label className="block text-primary font-semibold mb-1">CNIC (National Identity Card Number) <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 name="cnic"
@@ -188,21 +188,21 @@ const Register: React.FC = () => {
                             {errors.cnic && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">CNIC is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-480 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Category</label>
+                            <label className="block text-primary font-semibold mb-1">Category <span className="text-red-500">*</span></label>
                             <div className="flex flex-col">
                                 <label className="inline-flex items-center">
-                                    <input type="radio" name="category" value="Medical Student / HO / MO / PGR" checked={formData.category === 'Medical Student / HO / MO / PGR'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-0 ring-0 outline-none" />
+                                    <input type="radio" name="category" value="Medical Student / HO / MO / PGR" checked={formData.category === 'Medical Student / HO / MO / PGR'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
                                     <span className="ml-2">Medical Student / HO / MO / PGR</span>
                                 </label>
                                 <label className="inline-flex items-center">
-                                    <input type="radio" name="category" value="Other Degree Student" checked={formData.category === 'Other Degree Student'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-0 ring-0 outline-none" />
+                                    <input type="radio" name="category" value="Other Degree Student" checked={formData.category === 'Other Degree Student'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
                                     <span className="ml-2">Other Degree Student</span>
                                 </label>
                             </div>
                             {errors.category && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Category is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-500 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Institute Name</label>
+                            <label className="block text-primary font-semibold mb-1">Institute Name <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 name="institute"
@@ -215,7 +215,7 @@ const Register: React.FC = () => {
                             {errors.institute && <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">Institute name is required.</p>}
                         </div>
                         <div className={`transition-all duration-500 delay-520 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
-                            <label className="block text-primary font-semibold mb-1">Upload File URL</label>
+                            <label className="block text-primary font-semibold mb-1">Upload File URL <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 name="fileUrl"
