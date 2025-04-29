@@ -63,7 +63,7 @@ export default function Home() {
           />
           <div className="inset-0 bg-black/50 w-full h-full absolute top-0 left-0 pointer-events-none" />
         </motion.div>
-        <div className="text-center px-4 z-50 flex flex-col items-center justify-center h-full w-full">
+        <div className="text-center px-4 z-20 flex flex-col items-center justify-center h-full w-full">
           <motion.div
             variants={containerVariants}
             initial="hidden"
