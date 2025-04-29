@@ -87,9 +87,9 @@ export default function Home() {
             </motion.h1>
             <motion.p
               variants={childVariants}
-              className="text-3xl xs:text-4xl sm:text-6xl font-bold text-secondary-400 mb-10"
+              className="max-[450px]:text-2xl min-[450px]:text-3xl sm:text-4xl font-bold text-secondary-400 mb-10"
             >
-              Coming Soon
+              Striving for the rise of Islam and Islamic values
             </motion.p>
             <motion.div variants={childVariants}>
               <Link href="/contact" className="bg-secondary hover:bg-logo-tertiary text-primary-800  font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 transform">

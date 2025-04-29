@@ -17,8 +17,8 @@ const ENTRY_INSTITUTE = "entry.1577305617";
 const ENTRY_FILE_URL = "entry.421343422";
 
 const CATEGORY_OPTIONS = [
-  "Medical Student / HO / MO / PGR",
-  "Other Degree Student"
+    "Medical Student / HO / MO / PGR",
+    "Other Degree Student"
 ];
 const GENDER_OPTIONS = ["Male", "Female"];
 
@@ -50,12 +50,12 @@ const Register: React.FC = () => {
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [copied, setCopied] = useState(false);
-    
+
     // Replace single leftRef with individual refs for each section
     const [welcomeRef, welcomeInView] = useInView<HTMLDivElement>(0.2);
-    const [paymentRef, paymentInView] = useInView<HTMLDivElement>(0.2);
-    const [joinRef, joinInView] = useInView<HTMLDivElement>(0.2);
-    
+    const [paymentRef, paymentInView] = useInView<HTMLDivElement>(0.01);
+    const [joinRef, joinInView] = useInView<HTMLDivElement>(0.01);
+
     // Increase threshold for form animation to trigger earlier
     const [rightRef, rightInView] = useInView<HTMLDivElement>(0.01);
 
@@ -163,7 +163,7 @@ const Register: React.FC = () => {
         { name: 'cnic', label: `CNIC (National Identity Card Number)`, type: 'text', required: true },
         { name: 'category', label: `Category`, type: 'radio', required: true },
         { name: 'institute', label: `Institute Name`, type: 'text', required: true },
-        { name: 'imageFile', label: `Upload Image`, type: 'file', required: true },
+        { name: 'imageFile', label: `Upload Payment Receipt`, type: 'file', required: true },
     ] as const;
 
     return (
@@ -179,14 +179,14 @@ const Register: React.FC = () => {
             <div className="flex flex-col min-[975px]:space-x-8 min-[975px]:flex-row min-[975px]:items-start items-center justify-center">
                 <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6">
                     {/* Welcome section with slide-in-left animation */}
-                    <motion.div 
+                    <motion.div
                         ref={welcomeRef}
                         initial={{ x: -100, opacity: 0 }}
                         animate={welcomeInView ? { x: 0, opacity: 1 } : {}}
                         transition={{ duration: 0.7, ease: "easeOut" }}
                         className="bg-white rounded-xl shadow-lg border-l-4 border-secondary max-[400px]:p-4 max-[320px]:p-2 p-8 flex flex-col items-center text-center first-block-text"
                     >
-                        <h2 className="text-2xl md:text-3xl font-extrabold text-primary mb-3 drop-shadow-sm">Welcome to Islamic Fiesta 2025</h2>
+                        <h2 className="text-2xl md:text-3xl font-extrabold text-primary mb-3 drop-shadow-sm">Welcome to Islamic Fiesta'2025</h2>
                         <p className="text-lg text-gray-700 mb-4 font-medium">An inspiring event dedicated to learning, unity, and spiritual growth for the GMC community and beyond.</p>
                         <div className="my-2">
                             <span className="inline-block bg-secondary text-primary-900 font-semibold px-4 py-1 rounded-full text-base mb-2">May 7th, 2025 &middot; GMCTH Auditorium</span>
@@ -195,7 +195,7 @@ const Register: React.FC = () => {
                     </motion.div>
 
                     {/* Payment section with fade-in-up animation */}
-                    <motion.div 
+                    <motion.div
                         ref={paymentRef}
                         initial={{ y: 50, opacity: 0, scale: 0.9 }}
                         animate={paymentInView ? { y: 0, opacity: 1, scale: 1 } : {}}
@@ -205,7 +205,7 @@ const Register: React.FC = () => {
                         <span className="inline-block bg-secondary text-primary-900 font-semibold px-4 py-1 rounded-full text-base mb-2">Payment</span>
                         <p className="text-base text-secondary font-bold mb-2">Registration Fee: <span className='text-logo-tertiary'>800 Rs</span></p>
                         <p className="text-sm text-gray-500 mb-2">See payment details below and secure your spot today!</p>
-                        <motion.div 
+                        <motion.div
                             initial={{ y: 20, opacity: 0 }}
                             animate={paymentInView ? { y: 0, opacity: 1 } : {}}
                             transition={{ duration: 0.5, delay: 0.6 }}
@@ -228,128 +228,130 @@ const Register: React.FC = () => {
                         </motion.div>
                     </motion.div>
 
+                </div>
+                <div className={`w-full min-[975px]:min-w-[520px] max-[975px]:max-w-[750px] mb-4 transition-all duration-700 delay-300 transform ${rightInView ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'} flex flex-col justify-center items-center`}>
                     {/* Join section with pulse and bounce animation */}
-                    <motion.p 
+                    <motion.p
                         ref={joinRef}
                         initial={{ opacity: 0 }}
-                        animate={joinInView ? 
-                            { opacity: 1, scale: [1, 1.05, 1] } : 
+                        animate={joinInView ?
+                            { opacity: 1, scale: [1, 1.05, 1] } :
                             {}}
-                        transition={{ 
+                        transition={{
                             duration: 1,
                             delay: 0.4,
-                            scale: { 
+                            scale: {
                                 times: [0, 0.5, 1],
                                 duration: 1.5,
                                 repeat: Infinity,
                                 repeatDelay: 3
                             }
                         }}
-                        className="text-center text-lg font-bold text-primary-700 mt-8 bg-secondary/20 rounded-lg px-4 py-2 shadow-sm"
+                        className="text-center text-lg max-w-[600px] w-full font-bold text-primary-700 my-8 bg-secondary/20 rounded-lg px-4 py-2 shadow-sm"
                     >
                         Ready to join? <span className="text-secondary">Register by filling out this form!</span>
                     </motion.p>
-                </div>
-                <div ref={rightRef} className={`bg-white shadow-[2px_2px_8px_2px_rgba(102,102,153,0.3)] w-full min-[975px]:min-w-[520px] max-[975px]:max-w-[750px] border border-primary-300 p-8 rounded-2xl transition-all duration-700 delay-300 transform ${rightInView ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'} flex justify-center`}>
-                    <form onSubmit={handleSubmit} className="space-y-4 w-full">
-                        {inputFields.map((field, idx) => {
-                            // Each input gets its own in-view hook
-                            const [inputRef, inputInView] = useInView<HTMLInputElement | HTMLDivElement>(0.2);
-                            return (
-                                <motion.div
-                                    key={field.name}
-                                    ref={inputRef}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={inputInView ? { opacity: 1, y: 0 } : {}}
-                                    transition={{ duration: 0.5, delay: 0.05 * idx }}
-                                    className="w-full"
-                                >
-                                    <label className="block text-primary font-semibold mb-1">{field.label} {field.required && <span className="text-red-500">*</span>}</label>
-                                    {field.type !== 'radio' && field.type !== 'file' ? (
-                                        <input
-                                            type={field.type}
-                                            name={field.name}
-                                            value={formData[field.name as keyof typeof formData]}
-                                            onChange={handleChange}
-                                            className={`w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 ${errors[field.name as keyof typeof errors] ? 'border-red-500' : 'border-gray-300'}`}
-                                            placeholder={`Enter your ${field.label.toLowerCase()}`}
-                                            required={field.required}
-                                        />
-                                    ) : field.name === 'category' ? (
-                                        <select
-                                            name="category"
-                                            value={formData.category}
-                                            onChange={handleChange}
-                                            className={`w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
-                                            required
-                                        >
-                                            <option value="">Select category</option>
-                                            {CATEGORY_OPTIONS.map(option => (
-                                                <option key={option} value={option}>{option}</option>
-                                            ))}
-                                        </select>
-                                    ) : field.type === 'radio' ? (
-                                        <div className="flex flex-col">
-                                            <label className="inline-flex items-center">
-                                                <input type="radio" name={field.name} value="Male" checked={formData[field.name] === 'Male'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
-                                                <span className="ml-2">Male</span>
-                                            </label>
-                                            <label className="inline-flex items-center">
-                                                <input type="radio" name={field.name} value="Female" checked={formData[field.name] === 'Female'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
-                                                <span className="ml-2">Female</span>
-                                            </label>
-                                        </div>
-                                    ) : field.type === 'file' && (
-                                        <div className="relative w-full">
+                    <div ref={rightRef} className={`bg-white shadow-[2px_2px_8px_2px_rgba(102,102,153,0.3)] w-full min-[975px]:min-w-[520px] min-[975px]:max-w-[750px] max-[975px]:max-w-[750px] border border-primary-300 p-8 rounded-2xl transition-all duration-700 delay-300 transform ${rightInView ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'} flex justify-center`}>
+                        <form onSubmit={handleSubmit} className="space-y-4 w-full">
+                            {inputFields.map((field, idx) => {
+                                // Each input gets its own in-view hook
+                                const [inputRef, inputInView] = useInView<HTMLInputElement | HTMLDivElement>(0.2);
+                                return (
+                                    <motion.div
+                                        key={field.name}
+                                        ref={inputRef}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={inputInView ? { opacity: 1, y: 0 } : {}}
+                                        transition={{ duration: 0.5, delay: 0.05 * idx }}
+                                        className="w-full"
+                                    >
+                                        <label className="block text-primary font-semibold mb-1">{field.label} {field.required && <span className="text-red-500">*</span>}</label>
+                                        {field.type !== 'radio' && field.type !== 'file' ? (
                                             <input
-                                                id="image-upload"
-                                                type="file"
-                                                accept="image/jpeg,image/png,image/jpg"
-                                                onChange={handleImageChange}
-                                                className="hidden"
+                                                type={field.type}
+                                                name={field.name}
+                                                value={formData[field.name as keyof typeof formData]}
+                                                onChange={handleChange}
+                                                className={`w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 ${errors[field.name as keyof typeof errors] ? 'border-red-500' : 'border-gray-300'}`}
+                                                placeholder={`Enter your ${field.label.toLowerCase()}`}
+                                                required={field.required}
                                             />
-                                            <label htmlFor="image-upload" className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
-                                                {imageFile ? imageFile.name : 'Click to select image (jpg, jpeg, png)'}
-                                            </label>
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                Max size: 250KB. Supported formats: jpg, jpeg, png
-                                            </p>
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                If your image is too large, compress it at <a href="https://imagecompressor.11zon.com/en/image-compressor/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this link</a>.
-                                            </p>
-                                            {errors.imageFile && (
-                                                <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">
-                                                    Please upload a valid image (max 250KB, jpg/jpeg/png).
+                                        ) : field.name === 'category' ? (
+                                            <select
+                                                name="category"
+                                                value={formData.category}
+                                                onChange={handleChange}
+                                                className={`w-full cursor-pointer p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+                                                required
+                                            >
+                                                <option value="">Select category</option>
+                                                {CATEGORY_OPTIONS.map(option => (
+                                                    <option key={option} value={option}>{option}</option>
+                                                ))}
+                                            </select>
+                                        ) : field.type === 'radio' ? (
+                                            <div className="flex flex-col">
+                                                <label className="inline-flex items-center">
+                                                    <input type="radio" name={field.name} value="Male" checked={formData[field.name] === 'Male'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
+                                                    <span className="ml-2">Male</span>
+                                                </label>
+                                                <label className="inline-flex items-center">
+                                                    <input type="radio" name={field.name} value="Female" checked={formData[field.name] === 'Female'} onChange={handleChange} className="form-radio text-[#552e91] focus:outline-none focus:ring-1 focus:ring-[#552e91] rounded-full" required />
+                                                    <span className="ml-2">Female</span>
+                                                </label>
+                                            </div>
+                                        ) : field.type === 'file' && (
+                                            <div className="relative w-full">
+                                                <input
+                                                    id="image-upload"
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/jpg"
+                                                    onChange={handleImageChange}
+                                                    className="hidden"
+                                                />
+                                                <label htmlFor="image-upload" className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
+                                                    {imageFile ? imageFile.name : 'Click to select image (jpg, jpeg, png)'}
+                                                </label>
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    Max size: 250KB. Supported formats: jpg, jpeg, png
                                                 </p>
-                                            )}
-                                        </div>
-                                    )}
-                                    {errors[field.name as keyof typeof errors] && (
-                                        <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">
-                                            {field.label} is required.
-                                        </p>
-                                    )}
-                                </motion.div>
-                            );
-                        })}
-                        <motion.div 
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={rightInView ? { y: 0, opacity: 1 } : {}}
-                            transition={{ duration: 0.5, delay: 0.8 }}
-                            className="w-full"
-                        >
-                            <button
-                                type="submit"
-                                className="w-full bg-primary cursor-pointer font-semibold text-white p-3 rounded-lg hover:bg-secondary hover:text-primary-900 hover:scale-[1.02] transition-all duration-300 shadow-md flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed"
-                                disabled={loading}
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    If your image is too large, compress it at <a href="https://imagecompressor.11zon.com/en/image-compressor/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">this link</a>.
+                                                </p>
+                                                {errors.imageFile && (
+                                                    <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">
+                                                        Please upload a valid image (max 250KB, jpg/jpeg/png).
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                        {errors[field.name as keyof typeof errors] && (
+                                            <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">
+                                                {field.label} is required.
+                                            </p>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={rightInView ? { y: 0, opacity: 1 } : {}}
+                                transition={{ duration: 0.5, delay: 0.8 }}
+                                className="w-full"
                             >
-                                {loading ?
-                                    <span className="animate-spin border-4 border-[#552e91] border-t-transparent rounded-full w-6 h-6 inline-block"></span> :
-                                    'Register'
-                                }
-                            </button>
-                        </motion.div>
-                    </form>
+                                <button
+                                    type="submit"
+                                    className="w-full bg-primary cursor-pointer font-semibold text-white p-3 rounded-lg hover:bg-secondary hover:text-primary-900 hover:scale-[1.02] transition-all duration-300 shadow-md flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed"
+                                    disabled={loading}
+                                >
+                                    {loading ?
+                                        <span className="animate-spin border-4 border-[#552e91] border-t-transparent rounded-full w-6 h-6 inline-block"></span> :
+                                        'Register'
+                                    }
+                                </button>
+                            </motion.div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section >

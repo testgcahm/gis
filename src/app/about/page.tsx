@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import useInView from '../../components/useInView';
 
-function useTypewriter(text: string, speed = 60) {
+function useTypewriter(text: string, speed = 80) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -31,7 +31,7 @@ function useTypewriter(text: string, speed = 60) {
 
 export default function AboutPage() {
     const typewriterText = "Our goal is Allah's will & we strive hard only for rise of Islam, Islamic teachings & Islamic activities.";
-    const [animatedText, done] = useTypewriter(typewriterText, 35);
+    const [animatedText, done] = useTypewriter(typewriterText, 20);
 
     // In-view hooks for each section
     const [heroRef, heroInView] = useInView<HTMLDivElement>(0.2);
@@ -94,14 +94,22 @@ export default function AboutPage() {
                             { title: "Integrity", text: "We act with honesty and transparency in all our endeavors." }
                         ].map((value, index) => {
                             const [cardRef, cardInView] = useInView<HTMLDivElement>(0.2);
+                            const directions = [
+                                { x: -50, y: 0 }, // Left
+                                { x: 50, y: 0 },  // Right
+                                { x: 0, y: -50 }, // Top
+                                { x: 0, y: 50 }   // Bottom
+                            ];
+                            const direction = directions[index % directions.length];
+
                             return (
                                 <motion.div
                                     key={index}
                                     ref={cardRef}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={cardInView && valuesInView ? { opacity: 1, y: 0 } : {}}
-                                    transition={{ duration: 0.5, delay: index * 0.15 }}
-                                    className="bg-white border-l-3 border-l-primary border-b-3 border-b-secondary rounded-xl p-6 shadow-xl max-w-[300px] flex flex-col items-center text-center hover:scale-105 transition-transform duration-300 mx-auto"
+                                    initial={{ opacity: 0, ...direction }}
+                                    animate={cardInView && valuesInView ? { opacity: 1, x: 0, y: 0 } : {}}
+                                    transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.1 }}
+                                    className="bg-white border-l-3 border-l-primary border-b-3 border-b-secondary rounded-xl p-6 shadow-md shadow-primary/50 max-w-[300px] flex flex-col items-center text-center hover:scale-105 transition-transform duration-300 mx-auto"
                                 >
                                     <h3 className="text-lg sm:text-xl font-semibold text-primary mb-3 tracking-wide">{value.title}</h3>
                                     <p className="text-gray-700 text-base">{value.text}</p>
@@ -117,7 +125,7 @@ export default function AboutPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={ctaInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className="flex flex-col items-center text-center mt-16 pb-16 md:pb-20 w-full max-w-[925px] mx-auto"
+                    className="flex flex-col items-center text-center mt-16 w-full max-w-[925px] mx-auto"
                 >
                     <span className="inline-block bg-secondary text-primary-900 font-semibold px-4 py-1 rounded-full text-base mb-4">Join Us</span>
                     <h2 className="text-2xl sm:text-3xl font-semibold text-primary-700 mb-5">Make a Difference</h2>
