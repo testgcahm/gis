@@ -70,7 +70,7 @@ export default function EventsPage() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="min-h-[85vh] text-primary p-0 flex flex-col bg-gray-50"
+                className="min-h-[85vh] text-primary p-0 flex flex-col mx-3 md:mx-8 mb-8"
             >
                 <button
                     onClick={() => setDetailsView(null)}
@@ -84,19 +84,10 @@ export default function EventsPage() {
                 {/* Event Title Heading OUTSIDE the box */}
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 mb-4 mt-2 text-center w-full flex items-center justify-center gap-2">
                     {event.title}
-                    <button
-                        className="ml-2 px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded hover:bg-primary-200 border border-primary-200 transition"
-                        onClick={() => {
-                            navigator.clipboard.writeText(`${window.location.origin}/events?event=${event.slug}`);
-                        }}
-                        title="Copy shareable link"
-                    >
-                        Share
-                    </button>
                 </h2>
                 <div className="flex flex-col min-[975px]:space-x-8 min-[975px]:flex-row min-[975px]:items-start items-center justify-center">
-                    {/* Image aligned to start, same as register page */}
-                    <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-start justify-start">
+                    {/* Image centered for all screens */}
+                    <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-center justify-center">
                         <img 
                             src={event.image} 
                             alt={event.title} 
