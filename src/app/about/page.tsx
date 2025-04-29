@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import useInView from '../../components/useInView';
 
-function useTypewriter(text: string, speed = 40) {
+function useTypewriter(text: string, speed = 60) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function AboutPage() {
                 >
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary mb-4 drop-shadow-sm">GMC Islamic Society</h1>
                     <span className="inline-block bg-secondary text-primary-900 font-semibold px-4 py-1 rounded-full text-base mb-5">Who We Are</span>
-                    <p className="text-lg sm:text-xl font-mono text-primary-700 max-w-3xl mx-auto mb-6 min-h-[2.5em] border-l-3 border-l-primary-700 border-b-3 border-b-secondary pl-4 pr-2 py-2 bg-primary-50/60 shadow-inner rounded typewriter">
+                    <p className="text-lg sm:text-xl font-mono text-primary-700 max-w-3xl mx-auto mb-6 min-h-[2.5em] border-l-3 border-l-primary border-b-3 border-b-secondary pl-4 pr-2 py-2 bg-primary-50/60 shadow-inner rounded typewriter">
                       {animatedText}
                       <span className={`animate-pulse ${done ? 'invisible' : 'visible'}`}>|</span>
                     </p>
@@ -85,7 +85,7 @@ export default function AboutPage() {
                     className="flex flex-col items-center w-full max-w-[925px] mx-auto"
                 >
                     <h2 className="text-2xl sm:text-3xl font-semibold text-secondary mb-12 tracking-tight">Our Core Values</h2>
-                    <div className="flex flex-wrap justify-center gap-8 md:gap-10">
+                    <div className="grid max-sm:grid-cols-1 max-[960px]:grid-cols-2 min-[960px]:grid-cols-3 gap-8 md:gap-10 w-full">
                         {[ 
                             { title: "Faith", text: "We uphold and promote the core tenets of Islam in all our activities." },
                             { title: "Education", text: "We believe in empowering our community through Islamic and academic education." },
@@ -101,7 +101,7 @@ export default function AboutPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={cardInView && valuesInView ? { opacity: 1, y: 0 } : {}}
                                     transition={{ duration: 0.5, delay: index * 0.15 }}
-                                    className="bg-white border-l-3 border-l-primary border-b-3 border-b-secondary rounded-xl p-6 shadow-xl max-w-[300px] flex flex-col items-center text-center hover:scale-105 transition-transform duration-300"
+                                    className="bg-white border-l-3 border-l-primary border-b-3 border-b-secondary rounded-xl p-6 shadow-xl max-w-[300px] flex flex-col items-center text-center hover:scale-105 transition-transform duration-300 mx-auto"
                                 >
                                     <h3 className="text-lg sm:text-xl font-semibold text-primary mb-3 tracking-wide">{value.title}</h3>
                                     <p className="text-gray-700 text-base">{value.text}</p>
