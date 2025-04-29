@@ -92,3 +92,16 @@ button {
     background: theme(--color-primary-700);
   }
 }
+
+@media (max-width: 400px) {
+  .first-block-text {
+    font-size: 0.95rem;
+  }
+  .first-block-text h2 {
+    font-size: 1.2rem;
+  }
+  .first-block-text p,
+  .first-block-text span {
+    font-size: 0.95rem;
+  }
+}
