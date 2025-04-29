@@ -265,7 +265,7 @@ const Register: React.FC = () => {
                                     className="w-full"
                                 >
                                     <label className="block text-primary font-semibold mb-1">{field.label} {field.required && <span className="text-red-500">*</span>}</label>
-                                    {field.type !== 'radio' && field.type !== 'file' && field.name !== 'category' ? (
+                                    {field.type !== 'radio' && field.type !== 'file' ? (
                                         <input
                                             type={field.type}
                                             name={field.name}
