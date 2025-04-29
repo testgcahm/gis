@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { FaRegLightbulb, FaCalendarAlt, FaUserPlus, FaEnvelope } from 'react-icons/fa';
+import useInView from '../components/useInView';
 
-// Animation variants for parent and children
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 40 },
   show: {
     opacity: 1,
+    y: 0,
     transition: {
       staggerChildren: 0.15,
       delayChildren: 0.2,
@@ -17,29 +18,53 @@ const containerVariants = {
   },
 };
 const childVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7 } },
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
 };
 
-// Custom hook to detect if an element is in view
-function useInView<T extends HTMLElement = HTMLElement>(threshold = 0.2): [React.RefObject<T | null>, boolean] {
-  const ref = useRef<T | null>(null);
-  const [inView, setInView] = useState(false);
+const isRegistrationOpen = new Date() <= new Date('2025-05-06T23:59:59');
 
-  useEffect(() => {
-    if (inView) return; // Lock once in view
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setInView(true);
-      },
-      { threshold }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold, inView]);
-
-  return [ref, inView];
-}
+const journeySteps = [
+  {
+    icon: <FaRegLightbulb className="text-4xl text-secondary mb-4" />,
+    title: 'Our Mission',
+    description: "We strive for the rise of Islam, fostering unity, education, and service in the GMC community.",
+    link: '/about',
+    button: 'Discover More',
+    bg: 'bg-gradient-to-br from-[#f3eaff] via-[#e9ddff] to-[#f8fafc]'
+  },
+  {
+    icon: <FaCalendarAlt className="text-4xl text-primary mb-4" />,
+    title: 'Events & Activities',
+    description: "Experience inspiring sessions, competitions, and gatherings. See what's coming up!",
+    link: '/events',
+    button: 'View Events',
+    bg: 'bg-white'
+  },
+  isRegistrationOpen ? {
+    icon: <FaUserPlus className="text-4xl text-logo-tertiary mb-4" />,
+    title: 'Join the Movement',
+    description: "Ready to be part of something meaningful? Register for our next event and make a difference.",
+    link: '/register',
+    button: 'Register Now',
+    bg: 'bg-gradient-to-br from-[#e9ddff] via-[#f3eaff] to-[#f8fafc]'
+  } : {
+    icon: <FaUserPlus className="text-4xl text-logo-tertiary mb-4 opacity-50" />,
+    title: 'Registration Closed',
+    description: "Event registration is now closed. Stay tuned for future opportunities!",
+    link: '/events',
+    button: 'See Events',
+    bg: 'bg-gradient-to-br from-[#e9ddff] via-[#f3eaff] to-[#f8fafc]'
+  },
+  {
+    icon: <FaEnvelope className="text-4xl text-secondary mb-4" />,
+    title: 'Connect With Us',
+    description: "Questions, ideas, or feedback? Reach out and let’s grow together.",
+    link: '/contact',
+    button: 'Contact Us',
+    bg: 'bg-white'
+  }
+];
 
 export default function Home() {
   const [heroRef, heroInView] = useInView<HTMLElement>(0.3);
@@ -97,6 +122,32 @@ export default function Home() {
               </Link>
             </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Unique Journey Timeline */}
+      <section className="relative py-24 px-4">
+        <div className="max-w-3xl mx-auto flex flex-col items-center">
+          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-secondary/30 to-primary/10 -translate-x-1/2 z-0 rounded-full" />
+          {journeySteps.map((step, idx) => (
+            <motion.div
+              key={step.title}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, delay: idx * 0.1 }}
+              className={`relative z-10 w-full my-12 rounded-2xl shadow-xl ${step.bg} p-8 flex flex-col items-center text-center border-l-8 border-secondary`}
+            >
+              <div className="absolute left-1/2 -translate-x-1/2 -top-8 bg-white rounded-full shadow px-1 pt-3 border-4 border-secondary z-20">
+                {step.icon}
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-3 mt-6">{step.title}</h2>
+              <p className="text-gray-700 mb-6 text-lg max-w-xl mx-auto">{step.description}</p>
+              <Link href={step.link} className="inline-block bg-secondary hover:bg-logo-tertiary text-primary-900 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105">
+                {step.button}
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </section>
     </main>

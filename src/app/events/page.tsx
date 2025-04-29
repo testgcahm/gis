@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -7,7 +8,15 @@ import EventCard from '../../components/events/EventCard';
 import EventDetails from '../../components/events/EventDetails';
 import { eventDetails } from '../../components/events/eventData';
 
-export default function EventsPage() {
+export default function EventsPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EventsPage />
+    </Suspense>
+  );
+}
+
+function EventsPage() {
   const [detailsView, setDetailsView] = useState<null | number>(null);
   const [copiedIndex, setCopiedIndex] = useState<null | number>(null);
   const router = useRouter();
