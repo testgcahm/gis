@@ -8,6 +8,7 @@ export interface EventData {
   audience: string;
   description: string;
   image: string;
+  register?: boolean;
   speakers?: {
     name: string;
     bio: string;
@@ -15,6 +16,17 @@ export interface EventData {
 }
 
 export const eventDetails: EventData[] = [
+  {
+    slug: 'islamic-fiesta-competition',
+    title: "Islamic Fiesta' 2025 - Qirat and Naat Competition",
+    date: 'May 2, 2025',
+    time: '11:30 AM',
+    venue: 'LH-4, GMC, GUJRANWALA',
+    activities: 'Annual Qirat and Naat competition',
+    audience: 'Open to all',
+    description: `Incentives for participants (In sha Allah):\n1) Shields for top position holders\n2) Cash prize for top 3\n3) Certificates of participation\n\nResult of competition will be disclosed on 7th May.\n\nShields & cash prize will be presented to top 3/5 by Our Honourable Speakers on stage @Annual Fiesta'2025.`,
+    image: '/gmc_fiesta.jpeg',
+  },
   {
     slug: 'islamic-fiesta',
     title: "GMC Islamic Fiesta'2025",
@@ -25,6 +37,7 @@ export const eventDetails: EventData[] = [
     audience: 'Registered Members, Faculty and Gemcians only',
     description: "GMC Islamic Society presents ISLAMIC FIESTA' 2025. \nFeaturing:\n- Muhammad Raza Saqib Mustafai (Founding Chairman, Idara tul Mustafa International)\n- Raja Zia ul Haqq (CEO Youth Club)\nIncludes Islamic sessions, panel discussion, Q&A, Qirat & Naat, and Calligraphy competitions.",
     image: '/gmc_fiesta.jpeg',
+    register: true,
     speakers: [
       {
         name: 'Muhammad Raza Saqib Mustafai',

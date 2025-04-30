@@ -54,7 +54,6 @@ function EventsPage() {
           setTimeout(() => setCopiedIndex(null), 2000);
         }}
         copied={copiedIndex === detailsView}
-        showRegister={detailsView === 0}
       />
     );
   }
@@ -78,7 +77,6 @@ function EventsPage() {
                 setCopiedIndex(idx);
                 setTimeout(() => setCopiedIndex(null), 2000);
               }}
-              onRegister={idx === 0 ? () => router.push('/register') : undefined}
               copied={copiedIndex === idx}
             />
           </div>
