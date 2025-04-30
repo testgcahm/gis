@@ -78,22 +78,34 @@ export default function AboutPage() {
                 </motion.section>
 
                 {/* Cabinet Section */}
-                <section className="flex flex-col items-center text-center w-full max-w-[925px] mx-auto my-8">
+                <motion.section
+                  initial={{ opacity: 0, x: +60 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className="flex flex-col items-center text-center w-full max-w-[925px] mx-auto my-8"
+                >
                   <h2 className="text-2xl sm:text-3xl font-semibold text-secondary mb-4">Our Cabinet</h2>
                   <div className="flex flex-col items-center">
                     <Image src="/cabinet.jpeg" alt="GMC Cabinet" className="rounded-lg shadow-md w-full max-w-md mb-3 border-2 border-primary" width={500} height={350} />
                   </div>
-                </section>
+                </motion.section>
 
                 {/* Cabinet Note Section */}
-                <div className="flex justify-center w-full max-w-[925px] mx-auto mb-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  className="flex justify-center w-full max-w-[925px] mx-auto mb-8"
+                >
                   <div className="bg-primary-50 border-l-4 border-primary-600 rounded-lg shadow p-4 max-w-2xl text-left">
                     <span className="block text-primary-800 font-semibold mb-2">Note:</span>
                     <p className="text-gray-700 text-base leading-relaxed">
                       In addition to some management works, <span className="font-semibold text-primary-700">General Secretary</span> & <span className="font-semibold text-primary-700">Senior General Secretary</span> are entitled mainly to help <span className="font-semibold text-primary-700">President</span> & <span className="font-semibold text-primary-700">Vice Presidents</span> in maintaining discipline in DAWAH department in college & boys hostel premises.
                     </p>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Our Values */}
                 <motion.section
