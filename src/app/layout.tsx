@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://gmc-islamic-society.vercel.app/'),
   title: "Gujranwala Medical College Islamic Society",
   description: "Connecting students and faculty through faith, service, and community at Gujranwala Medical College.",
   keywords: ["GMC", "Islamic Society", "Medical College", "Gujranwala", "Society"],
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     icon: '/logo.ico',
   },
   alternates: {
-    canonical: "https://gmc-islamic-society.vercel.app/",
+    canonical: '/',
   },
   openGraph: {
     type: "website",
