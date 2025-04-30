@@ -25,7 +25,7 @@ export const eventDetails: EventData[] = [
     activities: 'Annual Qirat and Naat competition',
     audience: 'Open to all',
     description: `Incentives for participants (In sha Allah):\n1) Shields for top position holders\n2) Cash prize for top 3\n3) Certificates of participation\n\nResult of competition will be disclosed on 7th May.\n\nShields & cash prize will be presented to top 3/5 by Our Honourable Speakers on stage @Annual Fiesta'2025.`,
-    image: '/gmc_fiesta.jpeg',
+    image: '/naat_competition.jpeg',
   },
   {
     slug: 'islamic-fiesta',
