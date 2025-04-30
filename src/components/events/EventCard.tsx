@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
 import { EventData } from './eventData';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface EventCardProps {
   event: EventData;
@@ -43,7 +44,7 @@ const EventCard = ({ event, onDetails, onShare, copied }: EventCardProps) => {
           </div>
           <div className={`flex flex-row ${event.register ? 'max-[540px]:flex-col' : 'max-[430px]:flex-col'} items-start justify-between gap-4`}>
             <div className="flex items-center">
-              <img className="w-12 h-12 rounded-full mr-1" src="/logo.png" alt="GMC Logo" />
+              <Image className="rounded-full mr-1" src="/logo.png" alt="GMC Logo" width={48} height={48} />
               <div className="text-sm">
                 <p className="text-primary-900 leading-none">GMC Team</p>
                 <p className="text-gray-600">{event.date}</p>

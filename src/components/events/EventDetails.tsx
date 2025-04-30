@@ -1,6 +1,7 @@
 import { EventData } from './eventData';
 import { motion } from 'framer-motion';
 import { LocationIcon } from '../footer/FooterIcons';
+import Image from 'next/image';
 
 interface EventDetailsProps {
   event: EventData;
@@ -40,10 +41,12 @@ const EventDetails = ({ event, onBack, onShare, copied}: EventDetailsProps) => (
     </h2>
     <div className="flex flex-col min-[975px]:space-x-8 min-[975px]:flex-row min-[975px]:items-start items-center justify-center">
       <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-center justify-center">
-        <img
+        <Image
           src={event.image}
           alt={event.title}
-          className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg object-contain h-auto rounded-xl shadow border border-primary-100 bg-white"
+          width={500}
+          height={350}
+          className="w-full min-[500px]:min-w-[400px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg object-contain h-auto rounded-xl shadow border border-primary-100 bg-white"
         />
       </div>
       <div className="w-full min-[975px]:min-w-[520px] min-[975px]:max-w-[750px] max-[975px]:max-w-[750px] border border-primary-300 p-8 max-[450px]:p-4 rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.3)] flex flex-col gap-6 md:gap-8 bg-white">

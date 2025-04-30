@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import useInView from '../../components/useInView';
+import Image from 'next/image';
 
 function useTypewriter(text: string, speed = 80) {
   const [displayed, setDisplayed] = useState('');
@@ -80,7 +81,7 @@ export default function AboutPage() {
                 <section className="flex flex-col items-center text-center w-full max-w-[925px] mx-auto my-8">
                   <h2 className="text-2xl sm:text-3xl font-semibold text-secondary mb-4">Our Cabinet</h2>
                   <div className="flex flex-col items-center">
-                    <img src="/cabinet.jpeg" alt="GMC Cabinet" className="rounded-lg shadow-md w-full max-w-md mb-3 border-2 border-primary" />
+                    <Image src="/cabinet.jpeg" alt="GMC Cabinet" className="rounded-lg shadow-md w-full max-w-md mb-3 border-2 border-primary" width={500} height={350} />
                   </div>
                 </section>
 
