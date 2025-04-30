@@ -17,27 +17,30 @@ const EventDetails = ({ event, onBack, onShare, copied}: EventDetailsProps) => (
     transition={{ duration: 0.8, ease: 'easeOut' }}
     className="min-h-[85vh] text-primary p-0 flex flex-col mx-3 md:mx-8 mb-8"
   >
-    <button
-      onClick={onBack}
-      className="m-4 sm:m-6 md:m-8 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm md:text-base font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-400 self-start transition-all duration-300 flex items-center gap-2 border border-primary-400 hover:translate-x-[-5px]"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-      Back to Events
-    </button>
-    <h2 className="text-2xl max-[390px]:text-xl sm:text-3xl md:text-4xl font-bold text-primary-900 mb-4 mt-2 text-center w-full flex items-center justify-center">
-      {event.title}
+    <div className="flex items-center justify-between w-full">
       <button
-        className="ml-2 px-2 py-1 text-xs bg-primary text-white rounded hover:bg-primary-500 border border-primary-400 transition relative font-semibold shadow"
+        onClick={onBack}
+        className="m-4 sm:m-6 md:m-8 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm md:text-base font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-400 self-start transition-all duration-300 flex items-center gap-2 border border-primary-400 hover:translate-x-[-5px]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Events
+      </button>
+      {/* Share button in row with Back to Events */}
+      <button
+        className="m-4 sm:m-6 md:m-8 px-4 py-2 text-sm bg-primary text-white rounded hover:bg-primary-500 border border-primary-400 transition relative font-semibold shadow"
         onClick={onShare}
         title="Copy event link"
       >
-        Share
         {copied && (
-          <span className="absolute max-[580px]:-top-4 max-[580px]:-left-[28px] max-[410px]:-top-4 max-[410px]:-left-[36px] left-full ml-2 top-1/2 -translate-y-1/2 text-xs text-primary bg-white/80 px-2 py-1 rounded shadow animate-bounce whitespace-nowrap z-10">Link Copied!</span>
+          <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 text-xs text-primary bg-white px-2 py-1 rounded shadow animate-bounce whitespace-nowrap z-10">Link Copied!</span>
         )}
+        Share
       </button>
+    </div>
+    <h2 className="text-2xl max-[390px]:text-xl sm:text-3xl md:text-4xl font-bold text-primary-900 mb-4 mt-2 text-center w-full flex items-center justify-center">
+      {event.title}
     </h2>
     <div className="flex flex-col min-[975px]:space-x-8 min-[975px]:flex-row min-[975px]:items-start items-center justify-center">
       <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-center justify-center">

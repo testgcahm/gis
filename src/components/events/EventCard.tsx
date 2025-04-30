@@ -62,7 +62,7 @@ const EventCard = ({ event, onDetails, onShare, copied }: EventCardProps) => {
               >
                 Share
                 {copied && (
-                  <span className="absolute -top-4 -left-[14px] ml-2 -translate-y-1/2 text-xs text-primary bg-white/80 px-2 py-1 rounded shadow animate-bounce whitespace-nowrap z-10">Link Copied!</span>
+                  <span className="absolute -top-4 -left-[14px] ml-2 -translate-y-1/2 text-xs text-primary bg-white px-2 py-1 rounded shadow animate-bounce whitespace-nowrap z-10">Link Copied!</span>
                 )}
               </button>
             </div>
