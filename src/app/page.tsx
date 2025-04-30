@@ -85,6 +85,9 @@ export default function Home() {
             fill
             style={{ objectFit: 'cover' }}
             priority
+            placeholder="blur"
+            quality={60}
+            blurDataURL="/background.jpg"
           />
           <div className="inset-0 bg-black/50 w-full h-full absolute top-0 left-0 pointer-events-none" />
         </motion.div>
