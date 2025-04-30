@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "GMC Islamic Society",
     images: [
       {
-        url: "/logo.png", // Ensure this image exists in your public folder
+        url: "/og.png", // Ensure this image exists in your public folder
         width: 1200,
         height: 630,
         alt: "GMCIS - Gujranwala Medical College Islamic Society",
