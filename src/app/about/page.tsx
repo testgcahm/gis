@@ -72,9 +72,27 @@ export default function AboutPage() {
                 >
                     <h2 className="text-2xl sm:text-3xl font-semibold text-primary mb-4">Our Origins</h2>
                     <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-                        The GMC Islamic Society was founded in <span className="font-semibold text-secondary">2015</span> by <span className="font-bold text-primary-700">Noor ul Hassan of G6</span>, with the vision to promote Islamic values and activities within the community.
+                        The GMC Islamic Society was founded in <span className="font-semibold text-secondary">2018</span> by <span className="font-bold text-primary-700">Noor ul Hassan of G6</span>, with the vision to promote Islamic values and activities within the community.
                     </p>
                 </motion.section>
+
+                {/* Cabinet Section */}
+                <section className="flex flex-col items-center text-center w-full max-w-[925px] mx-auto my-8">
+                  <h2 className="text-2xl sm:text-3xl font-semibold text-secondary mb-4">Our Cabinet</h2>
+                  <div className="flex flex-col items-center">
+                    <img src="/cabinet.jpeg" alt="GMC Cabinet" className="rounded-lg shadow-md w-full max-w-md mb-3 border-2 border-primary" />
+                  </div>
+                </section>
+
+                {/* Cabinet Note Section */}
+                <div className="flex justify-center w-full max-w-[925px] mx-auto mb-8">
+                  <div className="bg-primary-50 border-l-4 border-primary-600 rounded-lg shadow p-4 max-w-2xl text-left">
+                    <span className="block text-primary-800 font-semibold mb-2">Note:</span>
+                    <p className="text-gray-700 text-base leading-relaxed">
+                      In addition to some management works, <span className="font-semibold text-primary-700">General Secretary</span> & <span className="font-semibold text-primary-700">Senior General Secretary</span> are entitled mainly to help <span className="font-semibold text-primary-700">President</span> & <span className="font-semibold text-primary-700">Vice Presidents</span> in maintaining discipline in DAWAH department in college & boys hostel premises.
+                    </p>
+                  </div>
+                </div>
 
                 {/* Our Values */}
                 <motion.section
