@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaRegLightbulb, FaCalendarAlt, FaUserPlus, FaEnvelope } from 'react-icons/fa';
 import useInView from '../components/useInView';
+import React from 'react';
 
 const containerVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -134,26 +135,36 @@ export default function Home() {
       </section>
 
       {/* Unique Journey Timeline */}
-      <section className="relative py-24 px-4">
-        <div className="max-w-3xl mx-auto flex flex-col items-center">
-          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-secondary/30 to-primary/10 -translate-x-1/2 z-0 rounded-full" />
+      <section className="relative py-24 px-4 bg-gray-50"> {/* Added subtle background to section */}
+        <div className="max-w-4xl mx-auto flex flex-col items-center"> {/* Increased max-width */}
+          {/* Timeline Line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-secondary/20 to-primary/5 -translate-x-1/2 z-0 rounded-full" /> {/* Adjusted gradient */}
+
           {journeySteps.steps.map((step, idx) => (
             <motion.div
               key={step.title}
-              initial={{ opacity: 0, y: 60 }}
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 1, delay: idx * 0.25, ease: 'easeInOut' }}
-              className={`relative z-10 w-full my-12 rounded-2xl shadow-xl ${step.bg} p-8 flex flex-col items-center text-center border-l-8 border-secondary`}
+              viewport={{ once: true, amount: 0.0001 }}
+              transition={{ duration: 0.8, delay: idx * 0.2, ease: 'easeOut' }} // Adjusted animation
+              className={`relative z-10 w-full my-8 rounded-lg shadow-lg bg-white p-6 flex items-start space-x-6 border-l-4 border-secondary`} // Changed layout: flex, items-start, space-x-6, padding, shadow, consistent bg, border
             >
-              <div className="absolute left-1/2 -translate-x-1/2 -top-8 bg-white rounded-full shadow px-1 pt-3 border-4 border-secondary z-20">
-                {step.icon}
+              {/* Timeline Dot */}
+              <div className="absolute left-[-2px] top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-secondary rounded-full border-4 border-white z-20" />
+
+              {/* Icon */}
+              <div className="flex-shrink-0 text-secondary mt-1"> {/* Adjusted icon container */}
+                {React.cloneElement(step.icon, { className: "text-3xl" })} {/* Resized icon */}
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-3 mt-6">{step.title}</h2>
-              <p className="text-gray-700 mb-6 text-lg max-w-xl mx-auto">{step.description}</p>
-              <Link href={step.link} className="inline-block bg-secondary hover:bg-logo-tertiary text-primary-900 font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:scale-105">
-                {step.button}
-              </Link>
+
+              {/* Content */}
+              <div className="flex-grow"> {/* Content takes remaining space */}
+                <h2 className="text-xl sm:text-2xl font-semibold text-primary mb-2">{step.title}</h2> {/* Adjusted font */}
+                <p className="text-gray-600 mb-4 text-base">{step.description}</p> {/* Adjusted font size */}
+                <Link href={step.link} className="inline-block bg-secondary hover:bg-logo-tertiary text-primary-900 font-semibold py-2 px-5 rounded text-sm transition-all duration-300 hover:scale-105"> {/* Adjusted button style */}
+                  {step.button}
+                </Link>
+              </div>
             </motion.div>
           ))}
         </div>
