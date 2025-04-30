@@ -24,47 +24,49 @@ const childVariants = {
 
 const isRegistrationOpen = new Date() <= new Date('2025-05-06T23:59:59');
 
-const journeySteps = [
-  {
-    icon: <FaRegLightbulb className="text-4xl text-secondary mb-4" />,
-    title: 'Our Mission',
-    description: "We strive for the rise of Islam, fostering unity, education, and service in the GMC community.",
-    link: '/about',
-    button: 'Discover More',
-    bg: 'bg-gradient-to-br from-[#f3eaff] via-[#e9ddff] to-[#f8fafc]'
-  },
-  {
-    icon: <FaCalendarAlt className="text-4xl text-primary mb-4" />,
-    title: 'Events & Activities',
-    description: "Experience inspiring sessions, competitions, and gatherings. See what's coming up!",
-    link: '/events',
-    button: 'View Events',
-    bg: 'bg-white'
-  },
-  isRegistrationOpen ? {
-    icon: <FaUserPlus className="text-4xl text-logo-tertiary mb-4" />,
-    title: 'Join the Movement',
-    description: "Ready to be part of something meaningful? Register for our next event and make a difference.",
-    link: '/register',
-    button: 'Register Now',
-    bg: 'bg-gradient-to-br from-[#e9ddff] via-[#f3eaff] to-[#f8fafc]'
-  } : {
-    icon: <FaUserPlus className="text-4xl text-logo-tertiary mb-4 opacity-50" />,
-    title: 'Registration Closed',
-    description: "Event registration is now closed. Stay tuned for future opportunities!",
-    link: '/events',
-    button: 'See Events',
-    bg: 'bg-gradient-to-br from-[#e9ddff] via-[#f3eaff] to-[#f8fafc]'
-  },
-  {
-    icon: <FaEnvelope className="text-4xl text-secondary mb-4" />,
-    title: 'Connect With Us',
-    description: "Questions, ideas, or feedback? Reach out and let’s grow together.",
-    link: '/contact',
-    button: 'Contact Us',
-    bg: 'bg-white'
-  }
-];
+const journeySteps = {
+  steps: [
+    {
+      icon: <FaRegLightbulb className="text-4xl text-secondary mb-4" />,
+      title: 'Our Mission',
+      description: "We strive for the rise of Islam, fostering unity, education, and service in the GMC community.",
+      link: '/about',
+      button: 'Discover More',
+      bg: 'bg-gradient-to-br from-[#f3eaff] via-[#e9ddff] to-[#f8fafc]'
+    },
+    {
+      icon: <FaCalendarAlt className="text-4xl text-primary mb-4" />,
+      title: 'Events & Activities',
+      description: "Experience inspiring sessions, competitions, and gatherings. See what's coming up!",
+      link: '/events',
+      button: 'View Events',
+      bg: 'bg-white'
+    },
+    isRegistrationOpen ? {
+      icon: <FaUserPlus className="text-4xl text-logo-tertiary mb-4" />,
+      title: 'Join the Movement',
+      description: "Ready to be part of something meaningful? Register for our next event and make a difference.",
+      link: '/register',
+      button: 'Register Now',
+      bg: 'bg-gradient-to-br from-[#e9ddff] via-[#f3eaff] to-[#f8fafc]'
+    } : {
+      icon: <FaUserPlus className="text-4xl text-logo-tertiary mb-4 opacity-50" />,
+      title: 'Registration Closed',
+      description: "Event registration is now closed. Stay tuned for future opportunities!",
+      link: '/events',
+      button: 'See Events',
+      bg: 'bg-gradient-to-br from-[#e9ddff] via-[#f3eaff] to-[#f8fafc]'
+    },
+    {
+      icon: <FaEnvelope className="text-4xl text-secondary mb-4" />,
+      title: 'Connect With Us',
+      description: "Questions, ideas, or feedback? Reach out and let’s grow together.",
+      link: '/contact',
+      button: 'Contact Us',
+      bg: 'bg-white'
+    }
+  ]
+};
 
 export default function Home() {
   const [heroRef, heroInView] = useInView<HTMLElement>(0.3);
@@ -86,8 +88,9 @@ export default function Home() {
             style={{ objectFit: 'cover' }}
             priority
             placeholder="blur"
-            quality={60}
-            blurDataURL="/background.jpg"
+            quality={40} // Lower quality for faster load
+            blurDataURL="/background.jpg" // Consider using a smaller, base64-encoded blur image for even faster placeholder
+            fetchPriority="high"
           />
           <div className="inset-0 bg-black/50 w-full h-full absolute top-0 left-0 pointer-events-none" />
         </motion.div>
@@ -134,7 +137,7 @@ export default function Home() {
       <section className="relative py-24 px-4">
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-secondary/30 to-primary/10 -translate-x-1/2 z-0 rounded-full" />
-          {journeySteps.map((step, idx) => (
+          {journeySteps.steps.map((step, idx) => (
             <motion.div
               key={step.title}
               initial={{ opacity: 0, y: 60 }}
