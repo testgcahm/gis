@@ -1,0 +1,5 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+Sitemap: https://gmc-islamic-society.vercel.app/sitemap.xml
