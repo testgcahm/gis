@@ -12,14 +12,14 @@ const containerVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2,
+      staggerChildren: 0.25,
+      delayChildren: 0.25,
     },
   },
 };
 const childVariants = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 1, ease: 'easeInOut' } },
 };
 
 const isRegistrationOpen = new Date() <= new Date('2025-05-06T23:59:59');
@@ -76,7 +76,7 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: heroInView ? 1 : 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 1.5, ease: 'easeInOut' }}
           className={`inset-0 transition-opacity z-0 duration-1000 ${heroInView ? 'opacity-100' : 'opacity-0'} w-full h-full absolute top-[82px] left-0`}
         >
           <Image
@@ -98,7 +98,7 @@ export default function Home() {
             animate={heroInView ? 'show' : 'hidden'}
             className="flex flex-col items-center w-full"
           >
-            <motion.div variants={childVariants}>
+            <motion.div variants={childVariants} transition={{ duration: 1, ease: 'easeInOut' }}>
               <Image
                 src="/logo.png"
                 alt="GIS Logo"
@@ -109,17 +109,19 @@ export default function Home() {
             </motion.div>
             <motion.h1
               variants={childVariants}
+              transition={{ duration: 1, ease: 'easeInOut' }}
               className="text-4xl md:text-6xl font-bold text-white mb-4"
             >
               GMC Islamic Society
             </motion.h1>
             <motion.p
               variants={childVariants}
+              transition={{ duration: 1, ease: 'easeInOut' }}
               className="max-[450px]:text-2xl min-[450px]:text-3xl sm:text-4xl font-bold text-secondary-400 mb-10"
             >
               Striving for the rise of Islam and Islamic values
             </motion.p>
-            <motion.div variants={childVariants}>
+            <motion.div variants={childVariants} transition={{ duration: 1, ease: 'easeInOut' }}>
               <Link href="/contact" className="bg-secondary hover:bg-logo-tertiary text-primary-800  font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 transform">
                 Get in Touch
               </Link>
@@ -138,7 +140,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, delay: idx * 0.1 }}
+              transition={{ duration: 1, delay: idx * 0.25, ease: 'easeInOut' }}
               className={`relative z-10 w-full my-12 rounded-2xl shadow-xl ${step.bg} p-8 flex flex-col items-center text-center border-l-8 border-secondary`}
             >
               <div className="absolute left-1/2 -translate-x-1/2 -top-8 bg-white rounded-full shadow px-1 pt-3 border-4 border-secondary z-20">

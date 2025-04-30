@@ -29,11 +29,12 @@ const Footer = () => {
                     {/* Logo and About */}
                     <div className="space-y-2 flex flex-col items-start md:col-span-1">
                         <div className="flex items-center">
-                            <div className="relative h-16 w-16 mr-2">
+                            <div className="relative mr-2">
                                 <Image
                                     src="/logo.png"
                                     alt="GMC Islamic Society Logo"
-                                    fill
+                                    width={64}
+                                    height={64}
                                     className="object-contain"
                                 />
                             </div>
