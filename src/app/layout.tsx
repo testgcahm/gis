@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logo.ico',
   },
+  alternates: {
+    canonical: "https://gmc-islamic-society.vercel.app/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
