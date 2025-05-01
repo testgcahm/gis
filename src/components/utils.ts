@@ -1,1 +1,1 @@
-export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL;
+export const baseUrl = 'https://gmc-islamic-society.vercel.app';

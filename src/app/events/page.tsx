@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 
 // Page component
 export default async function EventsPage() {
-  console.log(baseUrl)
+
   try {
     const res = await fetch(`${baseUrl}/api/events`);
     if (!res.ok) {
