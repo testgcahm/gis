@@ -1,11 +1,9 @@
-'use client';
-
+import { EventData } from './eventData';
 import { motion } from 'framer-motion';
 import { LocationIcon } from '../footer/FooterIcons';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { EventData } from './types';
 
 interface EventDetailsProps {
   event: EventData;

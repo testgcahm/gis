@@ -1,9 +1,9 @@
+import type { Metadata } from "next";
+import { eventDetails } from '@/components/events/eventData';
 import EventClient from "./EventClient";
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const res = await fetch('https://gmc-islamic-society.vercel.app/api/events', { cache: 'force-cache' });
-  const eventsArray = await res.json();
-  const event = eventsArray.find((e: any) => e.slug === params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const event = eventDetails.find(e => e.slug === params.slug);
   if (!event) return { title: 'Event Not Found | GMC Islamic Society' };
   const baseUrl = 'https://gmc-islamic-society.vercel.app';
   const url = `${baseUrl}/events/${event.slug}`;
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       'Events',
       event.title,
       event.venue,
-      ...(event.speakers ? event.speakers.map((s: any) => s.name) : [])
+      ...(event.speakers ? event.speakers.map(s => s.name) : [])
     ],
     icons: { icon: '/logo.ico' },
     alternates: { canonical: url },
@@ -44,16 +44,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export async function generateStaticParams() {
-  const res = await fetch('https://gmc-islamic-society.vercel.app/api/events', { cache: 'force-cache' });
-  const eventsArray = await res.json();
-  return eventsArray.map((event: any) => ({ slug: event.slug }));
-}
-
-export default async function EventPage({ params }: { params: { slug: string } }) {
-  const res = await fetch('https://gmc-islamic-society.vercel.app/api/events', { cache: 'force-cache' });
-  const eventsArray = await res.json();
-  const event = eventsArray.find((e: any) => e.slug === params.slug);
-  if (!event) return null;
-  return <EventClient event={event} />;
+export default function EventPage({ params }: { params: { slug: string } }) {
+  return <EventClient slug={params.slug} />;
 }
