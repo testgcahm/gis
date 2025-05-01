@@ -6,10 +6,17 @@ import { notFound } from "next/navigation";
 // Helper to fetch events list
 async function fetchEvents(): Promise<EventData[]> {
   try {
-    const res = await fetch(`${baseUrl}/api/events`);
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+      ? 'https://gmc-islamic-society.vercel.app/api/events'
+      : 'http://localhost:3000/api/events';
+
+    const res = await fetch(apiUrl, {
+      cache: 'no-store',
+    });
+
     if (!res.ok) {
-      console.error('Failed to fetch events:', res.status, res.statusText);
-      return [];
+      throw new Error(`Failed to fetch events: ${res.status}`);
     }
     const data = await res.json();
     return data.eventsArray ?? [];
