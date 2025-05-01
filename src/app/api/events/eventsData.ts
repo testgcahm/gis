@@ -31,5 +31,16 @@ export const eventsArray = [
                 "bio": "Raja Zia ul Haqq is a prominent motivational speaker and Islamic educator. He is recognized for his dynamic presentations and commitment to youth empowerment and community development."
             }
         ]
+    },
+    {
+        "slug": "friday-sessions",
+        "title": "Friday Sessions",
+        "date": "Every Friday",
+        "time": "12:00 PM - 12:30 PM",
+        "venue": "Gujranwala Medical College, Lecture Hall",
+        "activities": "Lectures, Guest Speakers, Dawah",
+        "audience": "Open to all",
+        "description": "No registration required. Just walk in and join the conversation!",
+        "image": "/Firday_sessions.png"
     }
 ];
