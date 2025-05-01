@@ -48,7 +48,7 @@ export default async function EventsPage() {
     const apiUrl = `${baseUrl}/api/events`
 
     // Use fetch with force-cache to enable static generation at build time
-    const res = await fetch(apiUrl, { cache: 'force-cache' });
+    const res = await fetch(apiUrl);
     
     if (!res.ok) {
       throw new Error(`Failed to fetch events: ${res.status}`);

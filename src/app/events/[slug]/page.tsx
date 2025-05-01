@@ -9,7 +9,7 @@ async function fetchEvents(): Promise<EventData[]> {
     const apiUrl = `${baseUrl}/api/events`
 
     // Use fetch with force-cache for static generation
-    const res = await fetch(apiUrl, { cache: 'force-cache' });
+    const res = await fetch(apiUrl);
 
     if (!res.ok) {
       throw new Error(`Failed to fetch events: ${res.status}`);
