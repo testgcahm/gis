@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import EventsClientWrapper from "./EventsClient";
+import EventsClient from "./EventsClient";
 
 export const metadata: Metadata = {
   title: 'Events | GMC Islamic Society',
@@ -41,5 +41,5 @@ export const metadata: Metadata = {
 };
 
 export default function EventsPage() {
-  return <EventsClientWrapper />;
+  return <EventsClient />;
 }

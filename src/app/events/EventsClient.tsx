@@ -1,87 +1,10 @@
 'use client';
 
-import { Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import EventCard from '../../components/events/EventCard';
-import EventDetails from '../../components/events/EventDetails';
 import { eventDetails } from '../../components/events/eventData';
 
-export default function EventsClientWrapper() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[30vh]">
-          <div className="relative w-12 h-12 rotate-spinner">
-            {[...Array(8)].map((_, i) => (
-              <span
-                key={i}
-                className="absolute w-2 h-2 rounded-full bg-primary"
-                style={{
-                  top: `${24 + 20 * Math.sin((i * Math.PI) / 4)}px`,
-                  left: `${24 + 20 * Math.cos((i * Math.PI) / 4)}px`,
-                }}
-              />
-            ))}
-            <style>{`
-              .rotate-spinner {
-                animation: spin 1s linear infinite;
-              }
-              @keyframes spin {
-                100% { transform: rotate(360deg); }
-              }
-            `}</style>
-          </div>
-        </div>
-      }
-    >
-      <EventsClient />
-    </Suspense>
-  );
-}
-
-function EventsClient() {
-  const [detailsView, setDetailsView] = useState<null | number>(null);
-  const [copiedIndex, setCopiedIndex] = useState<null | number>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const eventParam = searchParams.get('event');
-
-  useEffect(() => {
-    if (eventParam) {
-      const idx = eventDetails.findIndex(e => e.slug === eventParam);
-      setDetailsView(idx !== -1 ? idx : null);
-    } else {
-      setDetailsView(null);
-    }
-  }, [eventParam]);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (detailsView !== null) {
-      params.set('event', eventDetails[detailsView].slug);
-      router.replace(`${window.location.pathname}?${params.toString()}`);
-    } else {
-      router.replace(window.location.pathname);
-    }
-  }, [detailsView, router]);
-
-  if (detailsView !== null) {
-    const event = eventDetails[detailsView];
-    return (
-      <EventDetails
-        event={event}
-        onBack={() => setDetailsView(null)}
-        onShare={() => {
-          navigator.clipboard.writeText(`${window.location.origin}/events?event=${event.slug}`);
-          setCopiedIndex(detailsView);
-          setTimeout(() => setCopiedIndex(null), 2000);
-        }}
-        copied={copiedIndex === detailsView}
-      />
-    );
-  }
+export default function EventsClient() {
 
   return (
     <motion.div
@@ -96,13 +19,6 @@ function EventsClient() {
           <div key={event.slug}>
             <EventCard
               event={event}
-              onDetails={() => setDetailsView(idx)}
-              onShare={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/events?event=${event.slug}`);
-                setCopiedIndex(idx);
-                setTimeout(() => setCopiedIndex(null), 2000);
-              }}
-              copied={copiedIndex === idx}
             />
           </div>
         ))}
