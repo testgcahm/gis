@@ -8,12 +8,11 @@ async function fetchEvents(): Promise<EventData[]> {
   try {
     const isProduction = process.env.NODE_ENV === 'production';
     const apiUrl = isProduction
-      ? 'https://gmc-islamic-society.vercel.app/api/events'
-      : 'http://localhost:3000/api/events';
+    ? 'https://gmc-islamic-society.vercel.app/api/events'
+    : 'http://localhost:3000/api/events';
 
-    const res = await fetch(apiUrl, {
-      cache: 'no-store',
-    });
+      // Use fetch with force-cache for static generation
+    const res = await fetch(apiUrl, { cache: 'force-cache' });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch events: ${res.status}`);

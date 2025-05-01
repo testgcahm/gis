@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import EventsClient from "./EventsClient";
 import { EventData } from "@/components/events/types";
 
-// Explicitly mark this route as dynamic since we're using dynamic data
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   title: 'Events | GMC Islamic Society',
   description: 'See upcoming and past events organized by the Gujranwala Medical College Islamic Society.',
@@ -48,14 +45,11 @@ export const metadata: Metadata = {
 export default async function EventsPage() {
   try {
     const isProduction = process.env.NODE_ENV === 'production';
-    const apiUrl = isProduction 
-      ? 'https://gmc-islamic-society.vercel.app/api/events'
-      : 'http://localhost:3000/api/events';
-    
-    // Remove the 'next: { revalidate: 0 }' option since we're using force-dynamic
-    const res = await fetch(apiUrl, { 
-      cache: 'no-store'
-    });
+    const apiUrl = isProduction
+    ? 'https://gmc-islamic-society.vercel.app/api/events'
+    : 'http://localhost:3000/api/events';
+    // Use fetch with force-cache to enable static generation at build time
+    const res = await fetch(apiUrl, { cache: 'force-cache' });
     
     if (!res.ok) {
       throw new Error(`Failed to fetch events: ${res.status}`);
