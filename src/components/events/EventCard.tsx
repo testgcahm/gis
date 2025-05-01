@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { EventData } from './eventData';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useState } from 'react';
+import { EventData } from './types';
 
 interface EventCardProps {
   event: EventData;

@@ -2,10 +2,13 @@
 
 import { motion } from 'framer-motion';
 import EventCard from '../../components/events/EventCard';
-import { eventDetails } from '../../components/events/eventData';
+import { EventData } from '@/components/events/types';
 
-export default function EventsClient() {
+interface EventsClientProps {
+  events: EventData[];
+}
 
+export default function EventsClient({ events }: EventsClientProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -15,11 +18,9 @@ export default function EventsClient() {
     >
       <h1 className="text-4xl font-extrabold text-primary-700 mb-8 text-center">Events</h1>
       <div className="grid gap-10 w-full max-w-4xl">
-        {eventDetails.map((event, idx) => (
+        {events.map((event) => (
           <div key={event.slug}>
-            <EventCard
-              event={event}
-            />
+            <EventCard event={event} />
           </div>
         ))}
       </div>

@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
-import { eventDetails } from '@/components/events/eventData';
 import EventClient from "./EventClient";
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const event = eventDetails.find(e => e.slug === params.slug);
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const res = await fetch(`${baseUrl}/api/events`);
+  const eventsArray = await res.json();
+  const event = eventsArray.find((e: any) => e.slug === slug);
   if (!event) return { title: 'Event Not Found | GMC Islamic Society' };
-  const baseUrl = 'https://gmc-islamic-society.vercel.app';
   const url = `${baseUrl}/events/${event.slug}`;
   return {
     title: `${event.title} | GMC Islamic Society`,
@@ -21,7 +23,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       'Events',
       event.title,
       event.venue,
-      ...(event.speakers ? event.speakers.map(s => s.name) : [])
+      ...(event.speakers ? event.speakers.map((s: any) => s.name) : [])
     ],
     icons: { icon: '/logo.ico' },
     alternates: { canonical: url },
@@ -44,6 +46,19 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function EventPage({ params }: { params: { slug: string } }) {
-  return <EventClient slug={params.slug} />;
+export async function generateStaticParams() {
+  const res = await fetch(`${baseUrl}/api/events`);
+  const eventsArray = await res.json();
+  return eventsArray.map((event: any) => ({ slug: event.slug }));
+}
+
+// This page and all event slugs are statically generated at build time using event data.
+// To update, trigger a new build after event data changes.
+export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const res = await fetch(`${baseUrl}/api/events`);
+  const eventsArray = await res.json();
+  const event = eventsArray.find((e: any) => e.slug === slug);
+  if (!event) return null;
+  return <EventClient event={event} />;
 }

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import EventsClient from "./EventsClient";
+import { EventData } from "@/components/events/types";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const metadata: Metadata = {
   title: 'Events | GMC Islamic Society',
@@ -40,6 +43,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EventsPage() {
-  return <EventsClient />;
+// Page component
+export default async function EventsPage() {
+  try {
+    const res = await fetch(`${baseUrl}/api/events`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch events');
+    }
+    const events: EventData[] = await res.json();
+    return <EventsClient events={events} />;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return <EventsClient events={[]} />;
+  }
 }

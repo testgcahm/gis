@@ -6,15 +6,16 @@ import { LocationIcon } from '@/components/footer/FooterIcons';
 import Image from 'next/image';
 import { useState } from 'react';
 import React from 'react';
+import { EventData } from '@/components/events/types';
 
 interface EventClientProps {
-  event: any;
+  event: EventData | null;
 }
 
 export default function EventClient({ event }: EventClientProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
-  if (!event) return null;
+  if (!event) return <div className="text-center text-red-600 font-semibold mt-10">Event not found.</div>;
 
   const handleBack = () => router.push('/events');
   const handleShare = () => {
