@@ -5,12 +5,11 @@ import Image from 'next/image';
 import { EmailIcon, FacebookIcon, InstagramIcon, LocationIcon, PhoneIcon, WhatsAppIcon } from './FooterIcons';
 import { Copy } from 'lucide-react';
 import React, { useState } from 'react';
+import { email, phoneNumber, spaceInNumber } from '../utils';
 
 const Footer = () => {
     const [copied, setCopied] = useState(false);
     const [copiedEmail, setCopiedEmail] = useState(false);
-    const phoneNumber = '+923434369958';
-    const email = 'gmcislamicsociety1199@gmail.com';
     const handleCopy = () => {
         navigator.clipboard.writeText(phoneNumber);
         setCopied(true);
@@ -82,8 +81,8 @@ const Footer = () => {
                             </p>
                             <p className="flex items-center flex-wrap">
                                 <PhoneIcon className="mr-2 flex-shrink-0" />
-                                <a href="tel:+923434369958" className="hover:text-secondary-300 transition-colors">
-                                    +92 343 4369958
+                                <a href={`tel:${phoneNumber}`} className="hover:text-secondary-300 transition-colors">
+                                    {spaceInNumber(phoneNumber)}
                                 </a>
                                 <button onClick={handleCopy} className="ml-2 hover:text-secondary-300 text-primary-200 transition" aria-label="Copy phone number">
                                     <Copy size={18} />

@@ -5,6 +5,7 @@ import { EmailIcon, PhoneIcon, FacebookIcon, InstagramIcon, WhatsAppIcon } from 
 import { Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useInView from '@/components/useInView';
+import { email, phoneNumber, spaceInNumber } from '@/components/utils';
 
 const GOOGLE_FORM_URL = process.env.NEXT_PUBLIC_GOOGLE_FORM_CONTACT_URL;
 const ENTRY_NAME = "entry.780881885";
@@ -19,8 +20,6 @@ const ContactClient: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [copied, setCopied] = useState(false);
     const [copiedEmail, setCopiedEmail] = useState(false);
-    const phoneNumber = '+923434369958';
-    const email = 'gmcislamicsociety1199@gmail.com';
 
     // Animation refs for on-view
     const [infoRef, infoInView] = useInView<HTMLDivElement>(0.2);
@@ -140,7 +139,7 @@ const ContactClient: React.FC = () => {
                             </div>
                             <div className="flex items-center bg-[#f3eaff] rounded-lg px-3 py-2 shadow-sm group transition-all">
                                 <PhoneIcon className="mr-2 text-[#552e91]" />
-                                <a href={`tel:${phoneNumber}`} className="font-semibold text-primary-700 hover:text-[#7e5be9] transition-colors">+92 343 4369958</a>
+                                <a href={`tel:${phoneNumber}`} className="font-semibold text-primary-700 hover:text-[#7e5be9] transition-colors">{spaceInNumber(phoneNumber)}</a>
                                 <button onClick={handleCopy} className="ml-2 hover:text-primary-700 text-primary-400 transition" aria-label="Copy phone number">
                                     <Copy size={18} />
                                 </button>

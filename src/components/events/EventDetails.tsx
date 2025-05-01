@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion';
 import { LocationIcon } from '../footer/FooterIcons';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { EventData } from './types';
+import Link from 'next/link';
 
 interface EventDetailsProps {
   event: EventData;
@@ -13,16 +13,7 @@ interface EventDetailsProps {
 
 const EventDetails = ({ event }: EventDetailsProps) => {
 
-  const router = useRouter()
   const [copied, setCopied] = useState(false);
-
-  const handleRegister = () => {
-    router.push('/register')
-  }
-
-  const handleBack = () => {
-    router.push('/events')
-  }
 
   const onShare = async () => {
     const url = `${window.location.origin}/events/${event.slug}`;
@@ -39,8 +30,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
       className="min-h-[85vh] text-primary p-0 flex flex-col mx-3 md:mx-8 mb-8"
     >
       <div className="flex items-center justify-between w-full">
-        <button
-          onClick={handleBack}
+        <Link href='/events'><button
           className="m-4 sm:m-6 md:m-8 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm md:text-base font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-400 self-start transition-all duration-300 flex items-center gap-2 border border-primary-400 hover:translate-x-[-5px]"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -48,6 +38,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
           </svg>
           Back to Events
         </button>
+        </Link>
         {/* Share button in row with Back to Events */}
         <button
           className="m-4 sm:m-6 md:m-8 px-4 py-2 text-sm bg-primary text-white rounded hover:bg-primary-500 border border-primary-400 transition relative font-semibold shadow"
@@ -115,7 +106,9 @@ const EventDetails = ({ event }: EventDetailsProps) => {
           )}
           {event.register && (
             <div className="flex justify-center mt-4 md:mt-6">
-              <button onClick={handleRegister} className="bg-secondary hover:bg-secondary/90 text-white font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary/50 text-sm sm:text-base md:text-lg">Register for {event.title}</button>
+              <Link href='/register'>
+                <button className="bg-secondary hover:bg-secondary/90 text-white font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary/50 text-sm sm:text-base md:text-lg">Register for {event.title}</button>
+              </Link>
             </div>
           )}
         </div>

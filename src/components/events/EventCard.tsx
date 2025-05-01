@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useState } from 'react';
 import { EventData } from './types';
+import Link from 'next/link';
 
 interface EventCardProps {
   event: EventData;
@@ -12,16 +12,7 @@ interface EventCardProps {
 
 const EventCard = ({ event }: EventCardProps) => {
 
-  const router = useRouter()
   const [copied, setCopied] = useState(false);
-
-  const handleRegister = () => {
-    router.push('/register')
-  }
-
-  const handleDetails = () => {
-    router.push(`/events/${event.slug}`)
-  }
 
   const onShare = async () => {
     const url = `${window.location.origin}/events/${event.slug}`;
@@ -63,9 +54,9 @@ const EventCard = ({ event }: EventCardProps) => {
               </div>
             </div>
             <div className={`flex gap-2 flex-shrink-0 w-auto ${event.register ? 'max-[540px]:w-full max-[540px]:justify-center' : 'max-[430px]:w-full max-[430px]:justify-center'} max-[350px]:flex-col max-[350px]:w-full`}>
-              <button onClick={handleDetails} className="max-w-[120px] max-[350px]:max-w-full w-full bg-primary-500 hover:bg-primary-600 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Details</button>
+              <Link href={`/event/${event.slug}`}><button className="max-w-[120px] max-[350px]:max-w-full w-full bg-primary-500 hover:bg-primary-600 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Details</button></Link>
               {event.register && (
-                <button onClick={handleRegister} className="max-w-[120px] max-[350px]:max-w-full w-full bg-secondary hover:bg-secondary/80 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Register</button>
+                <Link href='/register'><button className="max-w-[120px] max-[350px]:max-w-full w-full bg-secondary hover:bg-secondary/80 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Register</button></Link>
               )}
               <button
                 className="relative max-w-[120px] max-[350px]:max-w-full w-full bg-primary text-white font-bold px-4 py-2 rounded-lg shadow-sm border border-primary-400 hover:bg-primary-500 transition-all duration-200 focus:outline-none"
