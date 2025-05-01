@@ -44,10 +44,9 @@ export const metadata: Metadata = {
 // Page component
 export default async function EventsPage() {
   try {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const apiUrl = isProduction
-    ? 'https://gmc-islamic-society.vercel.app/api/events'
-    : 'http://localhost:3000/api/events';
+    const apiUrl = 'https://gmc-islamic-society.vercel.app/api/events';
+    // const apiUrl = 'http://localhost:3000/api/events';
+
     // Use fetch with force-cache to enable static generation at build time
     const res = await fetch(apiUrl, { cache: 'force-cache' });
     
