@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import EventsClient from "./EventsClient";
 import { EventData } from "@/components/events/types";
+import { baseUrl } from "@/components/utils";
 
 export const metadata: Metadata = {
   title: 'Events | GMC Islamic Society',
@@ -44,8 +45,7 @@ export const metadata: Metadata = {
 // Page component
 export default async function EventsPage() {
   try {
-    const apiUrl = 'https://gmc-islamic-society.vercel.app/api/events';
-    // const apiUrl = 'http://localhost:3000/api/events';
+    const apiUrl = `${baseUrl}/api/events`
 
     // Use fetch with force-cache to enable static generation at build time
     const res = await fetch(apiUrl, { cache: 'force-cache' });

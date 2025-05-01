@@ -6,10 +6,9 @@ import { notFound } from "next/navigation";
 // Helper to fetch events list
 async function fetchEvents(): Promise<EventData[]> {
   try {
-    const apiUrl = 'https://gmc-islamic-society.vercel.app/api/events';
-    // const apiUrl = 'http://localhost:3000/api/events';
+    const apiUrl = `${baseUrl}/api/events`
 
-      // Use fetch with force-cache for static generation
+    // Use fetch with force-cache for static generation
     const res = await fetch(apiUrl, { cache: 'force-cache' });
 
     if (!res.ok) {
