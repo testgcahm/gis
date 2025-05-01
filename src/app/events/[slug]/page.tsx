@@ -1,13 +1,35 @@
+import { EventData } from "@/components/events/types";
 import EventClient from "./EventClient";
+import { baseUrl } from "@/components/utils";
+import { notFound } from "next/navigation";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+// Helper to fetch events list
+async function fetchEvents(): Promise<EventData[]> {
+  try {
+    const res = await fetch(`${baseUrl}/api/events`);
+    if (!res.ok) {
+      console.error('Failed to fetch events:', res.status, res.statusText);
+      return [];
+    }
+    const data = await res.json();
+    return data.eventsArray ?? [];
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
+  }
+}
 
+// Metadata generation for each event
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  // Await params as per Next.js 15's async params
   const { slug } = await params;
-  const res = await fetch(`${baseUrl}/api/events`);
-  const eventsArray = await res.json();
-  const event = eventsArray.find((e: any) => e.slug === slug);
-  if (!event) return { title: 'Event Not Found | GMC Islamic Society' };
+  const events = await fetchEvents();
+  const event = events.find((e: EventData) => e.slug === slug);
+
+  if (!event) {
+    return { title: "Event Not Found | GMC Islamic Society" };
+  }
+
   const url = `${baseUrl}/events/${event.slug}`;
   return {
     title: `${event.title} | GMC Islamic Society`,
@@ -23,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       'Events',
       event.title,
       event.venue,
-      ...(event.speakers ? event.speakers.map((s: any) => s.name) : [])
+      ...(event.speakers?.map((s) => s.name) ?? [])
     ],
     icons: { icon: '/logo.ico' },
     alternates: { canonical: url },
@@ -46,19 +68,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+// Static paths generation
 export async function generateStaticParams() {
-  const res = await fetch(`${baseUrl}/api/events`);
-  const eventsArray = await res.json();
-  return eventsArray.map((event: any) => ({ slug: event.slug }));
+  const events = await fetchEvents();
+  return events.map((e: EventData) => ({ slug: e.slug }));
 }
 
-// This page and all event slugs are statically generated at build time using event data.
-// To update, trigger a new build after event data changes.
+// Page component
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Await params for dynamic routing
   const { slug } = await params;
-  const res = await fetch(`${baseUrl}/api/events`);
-  const eventsArray = await res.json();
-  const event = eventsArray.find((e: any) => e.slug === slug);
-  if (!event) return null;
+  const events = await fetchEvents();
+  const event = events.find((e: EventData) => e.slug === slug);
+
+  if (!event) {
+    notFound();
+  }
+
   return <EventClient event={event} />;
 }

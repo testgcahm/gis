@@ -9,6 +9,13 @@ interface EventsClientProps {
 }
 
 export default function EventsClient({ events }: EventsClientProps) {
+  // Ensure events is always an array
+  const safeEvents = Array.isArray(events) ? events : [];
+
+  if (safeEvents.length === 0) {
+    return <div className="text-center text-red-600 text-3xl font-bold my-20">No events found.</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -18,7 +25,7 @@ export default function EventsClient({ events }: EventsClientProps) {
     >
       <h1 className="text-4xl font-extrabold text-primary-700 mb-8 text-center">Events</h1>
       <div className="grid gap-10 w-full max-w-4xl">
-        {events.map((event) => (
+        {safeEvents.map((event) => (
           <div key={event.slug}>
             <EventCard event={event} />
           </div>

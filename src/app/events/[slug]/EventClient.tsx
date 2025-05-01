@@ -15,7 +15,7 @@ interface EventClientProps {
 export default function EventClient({ event }: EventClientProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
-  if (!event) return <div className="text-center text-red-600 font-semibold mt-10">Event not found.</div>;
+  if (!event) return <div className="text-center text-red-600 text-3xl font-bold my-20">No events found.</div>;
 
   const handleBack = () => router.push('/events');
   const handleShare = () => {
@@ -72,19 +72,19 @@ export default function EventClient({ event }: EventClientProps) {
             </h3>
             <ul className="list-none pl-0 space-y-3 md:space-y-4 text-gray-800 text-sm sm:text-base md:text-lg mb-3">
               <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
                 Date:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.date}</span></li>
               <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
                 Time:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.time}</span></li>
               <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
                 <LocationIcon className="w-5 h-5 fill-primary-400" />
                 Venue:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.venue}</span></li>
               <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="5" cy="7" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="17" r="2"/><line x1="9" y1="7" x2="20" y2="7"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="17" x2="20" y2="17"/></svg>
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="5" cy="7" r="2" /><circle cx="5" cy="12" r="2" /><circle cx="5" cy="17" r="2" /><line x1="9" y1="7" x2="20" y2="7" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="17" x2="20" y2="17" /></svg>
                 Activities:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1" dangerouslySetInnerHTML={{ __html: event.activities }} /></li>
               <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                 Audience:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.audience}</span></li>
             </ul>
             <div className="bg-[#ededffc5] border border-primary-200 rounded-lg p-4 mt-3 md:mt-4 text-gray-800 text-base sm:text-lg leading-relaxed shadow-sm">
