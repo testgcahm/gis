@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 // Page component
 export default async function EventsPage() {
   try {
-    const apiUrl = 'https://gmc-islamic-society.vercel.app/api/events';
+    const apiUrl = 'https://gis-pixs-projects-8c330907.vercel.app/api/events';
     // const apiUrl = 'http://localhost:3000/api/events';
 
     // Use fetch with force-cache to enable static generation at build time
