@@ -1,34 +1,26 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { LocationIcon } from '../footer/FooterIcons';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { LocationIcon } from '@/components/footer/FooterIcons';
+import Image from 'next/image';
 import { useState } from 'react';
-import { EventData } from './types';
+import React from 'react';
 
-interface EventDetailsProps {
-  event: EventData;
+interface EventClientProps {
+  event: any;
 }
 
-const EventDetails = ({ event }: EventDetailsProps) => {
-
-  const router = useRouter()
+export default function EventClient({ event }: EventClientProps) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
+  if (!event) return null;
 
-  const handleRegister = () => {
-    router.push('/register')
-  }
-
-  const handleBack = () => {
-    router.push('/events')
-  }
-
-  const onShare = async () => {
-    const url = `${window.location.origin}/events/${event.slug}`;
-    await navigator.clipboard.writeText(url);
+  const handleBack = () => router.push('/events');
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -48,10 +40,9 @@ const EventDetails = ({ event }: EventDetailsProps) => {
           </svg>
           Back to Events
         </button>
-        {/* Share button in row with Back to Events */}
         <button
           className="m-4 sm:m-6 md:m-8 px-4 py-2 text-sm bg-primary text-white rounded hover:bg-primary-500 border border-primary-400 transition relative font-semibold shadow"
-          onClick={onShare}
+          onClick={handleShare}
           title="Copy event link"
         >
           {copied && (
@@ -79,20 +70,20 @@ const EventDetails = ({ event }: EventDetailsProps) => {
               Event Information
             </h3>
             <ul className="list-none pl-0 space-y-3 md:space-y-4 text-gray-800 text-sm sm:text-base md:text-lg mb-3">
-              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Calendar */}
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                 Date:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.date}</span></li>
-              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Clock */}
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                 Time:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.time}</span></li>
-              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Location */}
+              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
                 <LocationIcon className="w-5 h-5 fill-primary-400" />
                 Venue:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.venue}</span></li>
-              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* List/Activities */}
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="5" cy="7" r="2" /><circle cx="5" cy="12" r="2" /><circle cx="5" cy="17" r="2" /><line x1="9" y1="7" x2="20" y2="7" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="17" x2="20" y2="17" /></svg>
+              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="5" cy="7" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="17" r="2"/><line x1="9" y1="7" x2="20" y2="7"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="17" x2="20" y2="17"/></svg>
                 Activities:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1" dangerouslySetInnerHTML={{ __html: event.activities }} /></li>
-              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Users/Audience */}
-                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+              <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">
+                <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Audience:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.audience}</span></li>
             </ul>
             <div className="bg-[#ededffc5] border border-primary-200 rounded-lg p-4 mt-3 md:mt-4 text-gray-800 text-base sm:text-lg leading-relaxed shadow-sm">
@@ -104,7 +95,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
             <section>
               <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-secondary-800 border-b border-primary-200 pb-2">Speakers</h3>
               <div className="space-y-4 md:space-y-5 mt-4">
-                {event.speakers.map((speaker, idx) => (
+                {event.speakers.map((speaker: any, idx: number) => (
                   <div key={idx}>
                     <span className="font-semibold text-base sm:text-lg text-secondary">{speaker.name}</span>
                     <p className="text-gray-700 text-sm sm:text-base mt-1">{speaker.bio}</p>
@@ -115,13 +106,13 @@ const EventDetails = ({ event }: EventDetailsProps) => {
           )}
           {event.register && (
             <div className="flex justify-center mt-4 md:mt-6">
-              <button onClick={handleRegister} className="bg-secondary hover:bg-secondary/90 text-white font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary/50 text-sm sm:text-base md:text-lg">Register for {event.title}</button>
+              <a href="/register">
+                <button className="bg-secondary hover:bg-secondary/90 text-white font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary/50 text-sm sm:text-base md:text-lg">Register for {event.title}</button>
+              </a>
             </div>
           )}
         </div>
       </div>
     </motion.div>
-  )
-};
-
-export default EventDetails;
+  );
+}

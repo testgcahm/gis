@@ -1,22 +1,32 @@
 import { useRouter } from 'next/navigation';
-import { EventData } from './eventData';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useState } from 'react';
+import { EventData } from './types';
 
 interface EventCardProps {
   event: EventData;
-  onDetails: () => void;
-  onShare: () => void;
-  copied: boolean;
 }
 
-const EventCard = ({ event, onDetails, onShare, copied }: EventCardProps) => {
+const EventCard = ({ event }: EventCardProps) => {
 
   const router = useRouter()
+  const [copied, setCopied] = useState(false);
 
   const handleRegister = () => {
     router.push('/register')
   }
+
+  const handleDetails = () => {
+    router.push(`/events/${event.slug}`)
+  }
+
+  const onShare = async () => {
+    const url = `${window.location.origin}/events/${event.slug}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <motion.div
@@ -51,7 +61,7 @@ const EventCard = ({ event, onDetails, onShare, copied }: EventCardProps) => {
               </div>
             </div>
             <div className={`flex gap-2 flex-shrink-0 w-auto ${event.register ? 'max-[540px]:w-full max-[540px]:justify-center' : 'max-[430px]:w-full max-[430px]:justify-center'} max-[350px]:flex-col max-[350px]:w-full`}>
-              <button onClick={onDetails} className="max-w-[120px] max-[350px]:max-w-full w-full bg-primary-500 hover:bg-primary-600 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Details</button>
+              <button onClick={handleDetails} className="max-w-[120px] max-[350px]:max-w-full w-full bg-primary-500 hover:bg-primary-600 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Details</button>
               {event.register && (
                 <button onClick={handleRegister} className="max-w-[120px] max-[350px]:max-w-full w-full bg-secondary hover:bg-secondary/80 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 focus:outline-none">Register</button>
               )}
