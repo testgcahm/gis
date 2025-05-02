@@ -1,16 +1,5 @@
 export const eventsArray = [
     {
-        "slug": "islamic-fiesta-competition",
-        "title": "Islamic Fiesta' 2025 - Qirat and Naat Competition",
-        "date": "May 2, 2025",
-        "time": "10:55 AM",
-        "venue": "LH-4, GMC, GUJRANWALA",
-        "activities": "Annual Qirat and Naat competition",
-        "audience": "Open to all",
-        "description": "Incentives for participants (In sha Allah):\n1) Shields for top position holders\n2) Cash prize for top 3\n3) Certificates of participation\n\nResult of competition will be disclosed on 7th May.\n\nShields & cash prize will be presented to top 3/5 by Our Honourable Speakers on stage @Annual Fiesta'2025.",
-        "image": "/naat_competition.jpeg"
-    },
-    {
         "slug": "islamic-fiesta",
         "title": "GMC Islamic Fiesta'2025",
         "date": "May 7, 2025",
@@ -42,5 +31,16 @@ export const eventsArray = [
         "audience": "Open to all",
         "description": "No registration required. Just walk in and join the conversation!",
         "image": "/Firday_sessions.png"
+    },
+    {
+        "slug": "islamic-fiesta-competition",
+        "title": "Islamic Fiesta' 2025 - Qirat and Naat Competition",
+        "date": "May 2, 2025",
+        "time": "Ended",
+        "venue": "LH-4, GMC, GUJRANWALA",
+        "activities": "Annual Qirat and Naat competition",
+        "audience": "Open to all",
+        "description": "Incentives for participants (In sha Allah):\n1) Shields for top position holders\n2) Cash prize for top 3\n3) Certificates of participation\n\nResult of competition will be disclosed on 7th May.\n\nShields & cash prize will be presented to top 3/5 by Our Honourable Speakers on stage @Annual Fiesta'2025.",
+        "image": "/naat_competition.jpeg"
     }
 ];
