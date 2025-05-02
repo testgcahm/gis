@@ -3,7 +3,7 @@ export const eventsArray = [
         "slug": "islamic-fiesta-competition",
         "title": "Islamic Fiesta' 2025 - Qirat and Naat Competition",
         "date": "May 2, 2025",
-        "time": "11:30 AM",
+        "time": "10:55 AM",
         "venue": "LH-4, GMC, GUJRANWALA",
         "activities": "Annual Qirat and Naat competition",
         "audience": "Open to all",
