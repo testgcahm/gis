@@ -34,6 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             images: [escapeXmlUrl(baseImage)]
         },
         {
+            url: escapeXmlUrl(`${baseUrl}contact`),
+            lastModified: new Date(),
+            priority: 0.83,
+            images: [escapeXmlUrl(baseImage)]
+        },
+        {
             url: escapeXmlUrl(`${baseUrl}events`),
             lastModified: new Date(),
             priority: 0.83,
