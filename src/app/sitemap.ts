@@ -15,47 +15,52 @@ async function fetchEvents() {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    // Helper to escape & in URLs for XML
+    function escapeXmlUrl(url: string) {
+        return url.replace(/&/g, '&amp;');
+    }
+
     const staticRoutes = [
         {
-            url: `${baseUrl}`,
+            url: escapeXmlUrl(`${baseUrl}`),
             lastModified: new Date(),
             priority: 1,
-            images: baseImage
+            images: [escapeXmlUrl(baseImage)]
         },
         {
-            url: `${baseUrl}about`,
+            url: escapeXmlUrl(`${baseUrl}about`),
             lastModified: new Date(),
             priority: 0.83,
-            images: baseImage
+            images: [escapeXmlUrl(baseImage)]
         },
         {
-            url: `${baseUrl}events`,
+            url: escapeXmlUrl(`${baseUrl}events`),
             lastModified: new Date(),
             priority: 0.83,
-            images: baseImage
+            images: [escapeXmlUrl(baseImage)]
         },
         {
-            url: `${baseUrl}register`,
+            url: escapeXmlUrl(`${baseUrl}register`),
             lastModified: new Date(),
             priority: 0.83,
-            images: baseImage
+            images: [escapeXmlUrl(baseImage)]
         },
         {
-            url: `${baseUrl}admin`,
+            url: escapeXmlUrl(`${baseUrl}admin`),
             lastModified: new Date(),
             priority: 0.63,
-            images: baseImage
+            images: [escapeXmlUrl(baseImage)]
         }
     ];
 
     // Fetch all events and add their dynamic URLs
     const events = await fetchEvents();
     const eventRoutes = events.map((event: any) => ({
-        url: `${baseUrl}events/${event.slug}`,
+        url: escapeXmlUrl(`${baseUrl}events/${event.slug}`),
         lastModified: new Date(),
         priority: 0.76,
         images: [
-            `${baseUrl}_next/image?url=%2F${event.image}&w=1080&q=75`
+            escapeXmlUrl(`${baseUrl}_next/image?url=%2F${event.image}&w=1080&q=75`)
         ]
     }));
 
