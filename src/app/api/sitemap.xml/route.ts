@@ -9,6 +9,7 @@ const STATIC_PATHS = [
   'contact',
   'register',
   'events',
+  'admin'
 ];
 
 export async function GET() {

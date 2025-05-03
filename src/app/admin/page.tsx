@@ -15,27 +15,72 @@ const EventsPage = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const profileRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    // Add ref for scroll position
+    const scrollPositionRef = useRef(0);
+
+    // Force scroll to top when component mounts
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // Force scroll to top immediately
+            window.scrollTo(0, 0);
+            
+            // Disable scroll restoration for this page
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            
+            // Also try with a slight delay
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            }, 100);
+        }
+    }, []);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
+            // Save current scroll position before state change
+            if (typeof window !== 'undefined') {
+                scrollPositionRef.current = window.scrollY;
+            }
+            
             setIsLoggedIn(!!user);
             setUserEmail(user?.email || null);
             setChecking(false);
+            
+            // Force scroll to top after auth check
+            setTimeout(() => {
+                if (typeof window !== 'undefined') {
+                    window.scrollTo(0, 0);
+                }
+            }, 0);
         });
         return () => unsubscribe();
     }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+            // Don't close if clicking the toggle button (let the toggle logic handle it)
+            if (buttonRef.current && buttonRef.current.contains(event.target as Node)) {
+                return;
+            }
+            
+            // Close if clicking outside both the dropdown and button
+            if (
+                dropdownRef.current && 
+                !dropdownRef.current.contains(event.target as Node) &&
+                showDropdown
+            ) {
                 setShowDropdown(false);
             }
         }
-        if (showDropdown) {
-            document.addEventListener('mousedown', handleClickOutside, true); // use capture phase
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside, true);
-        }
+        
+        // Add listener to document
+        document.addEventListener('mousedown', handleClickOutside, true);
+        
         return () => {
             document.removeEventListener('mousedown', handleClickOutside, true);
         };
@@ -69,6 +114,7 @@ const EventsPage = () => {
                     <div className="relative" ref={profileRef}>
                         <div className='flex items-center justify-end p-4'>
                             <button
+                                ref={buttonRef}
                                 className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white focus:outline-none mb-2"
                                 onClick={() => setShowDropdown((v) => !v)}
                                 title="Profile"
@@ -77,7 +123,10 @@ const EventsPage = () => {
                             </button>
                         </div>
                         {showDropdown && (
-                            <div className="absolute right-10 top-14 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 animate-fade-in">
+                            <div 
+                                ref={dropdownRef}
+                                className="absolute right-10 top-14 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 animate-fade-in"
+                            >
                                 <div className="px-4 py-3 border-b border-gray-100">
                                     <p className="text-sm text-gray-700 font-semibold">{userEmail || 'No email'}</p>
                                 </div>

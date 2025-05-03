@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://gmc-islamic-society.vercel.app/api/sitemap.xml
+Sitemap: https://gmc-islamic-society.vercel.app/sitemap.xml

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export async function GET() {
@@ -24,11 +24,31 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     try {
-        const { id, ...data } = await request.json();
-        if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
-        const eventDoc = doc(db, 'events', id);
-        await updateDoc(eventDoc, data);
-        return NextResponse.json({ success: true });
+        const body = await request.json();
+        
+        // Check if we're doing bulk order update
+        if (Array.isArray(body.order)) {
+            // Handle reordering multiple events
+            const batch = writeBatch(db);
+            
+            // Update each event with its new order
+            body.order.forEach((item: { id: string, order: number }) => {
+                const { id, order } = item;
+                const eventRef = doc(db, 'events', id);
+                batch.update(eventRef, { order });
+            });
+            
+            // Commit the batch write
+            await batch.commit();
+            return NextResponse.json({ success: true });
+        } else {
+            // Handle single event update
+            const { id, ...data } = body;
+            if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
+            const eventDoc = doc(db, 'events', id);
+            await updateDoc(eventDoc, data);
+            return NextResponse.json({ success: true });
+        }
     } catch (error) {
         return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
     }
