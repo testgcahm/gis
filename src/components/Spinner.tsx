@@ -24,4 +24,11 @@ const Spinner = () => {
     )
 };
 
+const SimpleSpinner = () => {
+    return (
+        <div className="w-6 h-6 border-4 border-gray-200 border-t-4 border-t-primary rounded-full animate-spin"></div>
+    )
+}
+
 export default Spinner;
+export { SimpleSpinner };
