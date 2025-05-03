@@ -11,7 +11,7 @@ const STATIC_PATHS = [
   'admin',
 ]
 
-export default async function handler() {
+export async function GET() {
   const apiUrl = `${baseUrl}/api/events`
   const fetchRes = await fetch(apiUrl, { cache: 'force-cache' })
 
@@ -27,24 +27,22 @@ export default async function handler() {
       lastmod: new Date().toISOString(),
       priority: path === '' ? '1.00' : '0.80',
     })),
-    // Always use “now” here, ignore updatedAt:
     ...eventsArray.map(({ slug }) => ({
       loc: `${baseUrl}/events/${slug}`,
-      lastmod: new Date().toISOString(),     // ← always current date
+      lastmod: new Date().toISOString(),
       priority: '0.74',
     })),
   ]
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-      .map(
-        ({ loc, lastmod, priority }) => `  <url>
-    <loc>${loc}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <priority>${priority}</priority>
-  </url>`
-      )
-      .join('\n')}
-</urlset>`
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+    .map(
+      ({ loc, lastmod, priority }) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <priority>${priority}</priority>\n  </url>`
+    )
+    .join('\n')}\n</urlset>`
+
+  return new Response(xml, {
+    headers: {
+      'Content-Type': 'application/xml',
+    },
+  })
 }
