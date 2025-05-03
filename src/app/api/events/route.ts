@@ -1,6 +1,39 @@
 import { NextResponse } from 'next/server';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
+
+const ALLOWED_EMAILS = [
+  'abidahmed094@gmail.com',
+];
+
+const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL;
+
+async function verifyRequest(request: Request) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { error: 'Missing or invalid Authorization header' };
+  }
+  const idToken = authHeader.split('Bearer ')[1];
+  try {
+    const decoded = await adminAuth.verifyIdToken(idToken);
+    if (!decoded.email || !ALLOWED_EMAILS.includes(decoded.email)) {
+      return { error: 'Unauthorized: Email not allowed' };
+    }
+    return { email: decoded.email };
+  } catch (err) {
+    return { error: 'Invalid or expired token' };
+  }
+}
+
+async function triggerVercelBuild() {
+  if (!VERCEL_DEPLOY_HOOK_URL) return;
+  try {
+    await fetch(VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
+  } catch (err) {
+    // Optionally log error
+  }
+}
 
 export async function GET() {
     // Fetch all documents from the 'events' collection
@@ -11,11 +44,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const auth = await verifyRequest(request);
+    if (auth.error) {
+        return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    }
     try {
         const data = await request.json();
-        // Add the new event to the 'events' collection
-        const eventsCol = collection(db, 'events');
-        const docRef = await addDoc(eventsCol, data);
+        const docRef = await adminDb.collection('events').add(data);
         return NextResponse.json({ success: true, id: docRef.id });
     } catch (error) {
         return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
@@ -23,30 +58,27 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+    const auth = await verifyRequest(request);
+    if (auth.error) {
+        return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    }
     try {
         const body = await request.json();
-        
-        // Check if we're doing bulk order update
         if (Array.isArray(body.order)) {
-            // Handle reordering multiple events
-            const batch = writeBatch(db);
-            
-            // Update each event with its new order
+            const batch = adminDb.batch();
             body.order.forEach((item: { id: string, order: number }) => {
-                const { id, order } = item;
-                const eventRef = doc(db, 'events', id);
-                batch.update(eventRef, { order });
+                const eventRef = adminDb.collection('events').doc(item.id);
+                batch.update(eventRef, { order: item.order });
             });
-            
-            // Commit the batch write
             await batch.commit();
+            await triggerVercelBuild(); // Trigger Vercel build after reorder
             return NextResponse.json({ success: true });
         } else {
-            // Handle single event update
             const { id, ...data } = body;
             if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
-            const eventDoc = doc(db, 'events', id);
-            await updateDoc(eventDoc, data);
+            const eventDoc = adminDb.collection('events').doc(id);
+            await eventDoc.update(data);
+            await triggerVercelBuild(); // Trigger Vercel build after update
             return NextResponse.json({ success: true });
         }
     } catch (error) {
@@ -55,11 +87,15 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+    const auth = await verifyRequest(request);
+    if (auth.error) {
+        return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    }
     try {
         const { id } = await request.json();
         if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
-        const eventDoc = doc(db, 'events', id);
-        await deleteDoc(eventDoc);
+        const eventDoc = adminDb.collection('events').doc(id);
+        await eventDoc.delete();
         return NextResponse.json({ success: true });
     } catch (error) {
         return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });

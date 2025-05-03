@@ -7,6 +7,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import DraggableEventsList from "@/components/admin/DraggableEventsList";
 import EventForm from "@/components/admin/EventForm";
 import { emptyEvent } from "@/components/admin/types";
+import { getAuth } from 'firebase/auth';
 
 export default function EventsManager() {
     const [events, setEvents] = useState<EventData[]>([]);
@@ -15,6 +16,7 @@ export default function EventsManager() {
     const [form, setForm] = useState<Partial<EventData>>(emptyEvent);
     const [error, setError] = useState<string | null>(null);
     const [orderChanged, setOrderChanged] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Fetch events
@@ -93,6 +95,14 @@ export default function EventsManager() {
         setForm({ ...form, speakers });
     };
 
+    // Utility to get current user's ID token
+    async function getIdToken() {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) return null;
+      return await user.getIdToken();
+    }
+
     // Add or update event
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,9 +110,14 @@ export default function EventsManager() {
         setError(null);
         try {
             const method = editing ? "PUT" : "POST";
+            const idToken = await getIdToken();
+            if (!idToken) throw new Error("You must be logged in to perform this action.");
             const res = await fetch("/api/events", {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${idToken}`,
+                },
                 body: JSON.stringify(editing ? form : { ...form, slug: form.slug?.trim() || form.title?.toLowerCase().replace(/\s+/g, "-") }),
             });
             const data = await res.json();
@@ -110,6 +125,9 @@ export default function EventsManager() {
             setForm(emptyEvent);
             setEditing(null);
             fetchEvents();
+            setError(null);
+            setSuccessMessage('Event saved successfully!');
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (e: any) {
             setError(e.message);
         }
@@ -131,14 +149,22 @@ export default function EventsManager() {
         setLoading(true);
         setError(null);
         try {
+            const idToken = await getIdToken();
+            if (!idToken) throw new Error("You must be logged in to perform this action.");
             const res = await fetch("/api/events", {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${idToken}`,
+                },
                 body: JSON.stringify({ id }),
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error || "Unknown error");
             fetchEvents();
+            setError(null);
+            setSuccessMessage('Event deleted successfully!');
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (e: any) {
             setError(e.message);
         }
@@ -162,16 +188,23 @@ export default function EventsManager() {
         setLoading(true);
         setError(null);
         try {
-            // Send the new order (array of slugs) to the backend
+            const idToken = await getIdToken();
+            if (!idToken) throw new Error("You must be logged in to perform this action.");
             const res = await fetch('/api/events', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
                 body: JSON.stringify({ order: events.map((e, i) => ({ id: (e as any).id, order: i })) }),
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Unknown error');
             setOrderChanged(false);
             fetchEvents();
+            setError(null);
+            setSuccessMessage('Order saved successfully!');
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (e: any) {
             setError(e.message);
         }
@@ -196,6 +229,26 @@ export default function EventsManager() {
         >
             <h1 className="text-4xl font-extrabold text-primary-700 mb-8 text-center">Events Admin</h1>
             {error && <div className="text-red-600 font-bold mb-4">{error}</div>}
+            {successMessage && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    background: '#4ade80',
+                    color: '#065f46',
+                    padding: '12px 32px',
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    fontSize: '1.1rem',
+                    minWidth: '220px',
+                    textAlign: 'center',
+                }}>
+                    {successMessage}
+                </div>
+            )}
             
             {/* Event Form Component */}
             <EventForm 
