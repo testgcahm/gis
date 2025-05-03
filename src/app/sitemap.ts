@@ -1,6 +1,11 @@
 import { baseImage, baseUrl } from '@/components/utils'
 import type { MetadataRoute } from 'next'
 
+// Helper to escape XML special characters in URLs
+function escapeXml(str: string) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
 // Helper to fetch all events
 async function fetchEvents() {
     try {
@@ -54,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/events/${event.slug}`,
         lastModified: new Date(),
         priority: 0.76,
-        images: `${baseUrl}_next/image?url=%2F${event.image}&w=1080&q=75` || baseImage
+        images: escapeXml(`${baseUrl}_next/image?url=%2F${event.image}&w=1080&q=75`) || baseImage
     }));
 
     return [...staticRoutes, ...eventRoutes];
