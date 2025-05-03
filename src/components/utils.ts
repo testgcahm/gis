@@ -1,5 +1,7 @@
 export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL;
 
+export const baseImage = 'https://gmc-islamic-society.vercel.app/og.png'
+
 export const spaceInNumber = (phoneNumber: string) => {
     // Remove all spaces first
     const clean = phoneNumber.replace(/\s+/g, '');

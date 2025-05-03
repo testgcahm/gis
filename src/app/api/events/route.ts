@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { collection, getDocs} from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
@@ -7,7 +7,7 @@ const ALLOWED_EMAILS = [
   'abidahmed094@gmail.com',
 ];
 
-const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL;
+const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL + '?buildCache=false';
 
 async function verifyRequest(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -36,68 +36,68 @@ async function triggerVercelBuild() {
 }
 
 export async function GET() {
-    // Fetch all documents from the 'events' collection
-    const eventsCol = collection(db, 'events');
-    const eventsSnapshot = await getDocs(eventsCol);
-    const eventsArray = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return NextResponse.json({ eventsArray });
+  // Fetch all documents from the 'events' collection
+  const eventsCol = collection(db, 'events');
+  const eventsSnapshot = await getDocs(eventsCol);
+  const eventsArray = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return NextResponse.json({ eventsArray });
 }
 
 export async function POST(request: Request) {
-    const auth = await verifyRequest(request);
-    if (auth.error) {
-        return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
-    }
-    try {
-        const data = await request.json();
-        const docRef = await adminDb.collection('events').add(data);
-        return NextResponse.json({ success: true, id: docRef.id });
-    } catch (error) {
-        return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
-    }
+  const auth = await verifyRequest(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  try {
+    const data = await request.json();
+    const docRef = await adminDb.collection('events').add(data);
+    return NextResponse.json({ success: true, id: docRef.id });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
+  }
 }
 
 export async function PUT(request: Request) {
-    const auth = await verifyRequest(request);
-    if (auth.error) {
-        return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  const auth = await verifyRequest(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  try {
+    const body = await request.json();
+    if (Array.isArray(body.order)) {
+      const batch = adminDb.batch();
+      body.order.forEach((item: { id: string, order: number }) => {
+        const eventRef = adminDb.collection('events').doc(item.id);
+        batch.update(eventRef, { order: item.order });
+      });
+      await batch.commit();
+      await triggerVercelBuild(); // Trigger Vercel build after reorder
+      return NextResponse.json({ success: true });
+    } else {
+      const { id, ...data } = body;
+      if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
+      const eventDoc = adminDb.collection('events').doc(id);
+      await eventDoc.update(data);
+      await triggerVercelBuild(); // Trigger Vercel build after update
+      return NextResponse.json({ success: true });
     }
-    try {
-        const body = await request.json();
-        if (Array.isArray(body.order)) {
-            const batch = adminDb.batch();
-            body.order.forEach((item: { id: string, order: number }) => {
-                const eventRef = adminDb.collection('events').doc(item.id);
-                batch.update(eventRef, { order: item.order });
-            });
-            await batch.commit();
-            await triggerVercelBuild(); // Trigger Vercel build after reorder
-            return NextResponse.json({ success: true });
-        } else {
-            const { id, ...data } = body;
-            if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
-            const eventDoc = adminDb.collection('events').doc(id);
-            await eventDoc.update(data);
-            await triggerVercelBuild(); // Trigger Vercel build after update
-            return NextResponse.json({ success: true });
-        }
-    } catch (error) {
-        return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
-    }
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
+  }
 }
 
 export async function DELETE(request: Request) {
-    const auth = await verifyRequest(request);
-    if (auth.error) {
-        return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
-    }
-    try {
-        const { id } = await request.json();
-        if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
-        const eventDoc = adminDb.collection('events').doc(id);
-        await eventDoc.delete();
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
-    }
+  const auth = await verifyRequest(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  try {
+    const { id } = await request.json();
+    if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
+    const eventDoc = adminDb.collection('events').doc(id);
+    await eventDoc.delete();
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
+  }
 }
