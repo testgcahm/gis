@@ -5,7 +5,7 @@ import type { MetadataRoute } from 'next'
 async function fetchEvents() {
     try {
         const apiUrl = `${baseUrl}api/events`;
-        const res = await fetch(apiUrl);
+        const res = await fetch(apiUrl, { cache: 'force-cache' });
         if (!res.ok) return [];
         const data = await res.json();
         return data.eventsArray ?? [];
