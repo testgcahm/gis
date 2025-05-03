@@ -17,31 +17,31 @@ async function fetchEvents() {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const staticRoutes = [
         {
-            url: `[${baseUrl}]`,
+            url: `${baseUrl}`,
             lastModified: new Date(),
             priority: 1,
             images: baseImage
         },
         {
-            url: `[${baseUrl}about]`,
+            url: `${baseUrl}about`,
             lastModified: new Date(),
             priority: 0.83,
             images: baseImage
         },
         {
-            url: `[${baseUrl}events]`,
+            url: `${baseUrl}events`,
             lastModified: new Date(),
             priority: 0.83,
             images: baseImage
         },
         {
-            url: `[${baseUrl}register]`,
+            url: `${baseUrl}register`,
             lastModified: new Date(),
             priority: 0.83,
             images: baseImage
         },
         {
-            url: `[${baseUrl}admin]`,
+            url: `${baseUrl}admin`,
             lastModified: new Date(),
             priority: 0.63,
             images: baseImage
