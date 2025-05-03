@@ -5,6 +5,7 @@ import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 const ALLOWED_EMAILS = [
   'abidahmed094@gmail.com',
+  
 ];
 
 const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL + '?buildCache=false';

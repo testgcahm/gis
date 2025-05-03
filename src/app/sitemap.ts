@@ -4,7 +4,7 @@ import type { MetadataRoute } from 'next'
 // Helper to fetch all events
 async function fetchEvents() {
     try {
-        const apiUrl = `${baseUrl}/api/events`;
+        const apiUrl = `${baseUrl}api/events`;
         const res = await fetch(apiUrl);
         if (!res.ok) return [];
         const data = await res.json();
@@ -23,25 +23,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             images: baseImage
         },
         {
-            url: `${baseUrl}/about`,
+            url: `${baseUrl}about`,
             lastModified: new Date(),
             priority: 0.83,
             images: baseImage
         },
         {
-            url: `${baseUrl}/events`,
+            url: `${baseUrl}events`,
             lastModified: new Date(),
             priority: 0.83,
             images: baseImage
         },
         {
-            url: `${baseUrl}/register`,
+            url: `${baseUrl}register`,
             lastModified: new Date(),
             priority: 0.83,
             images: baseImage
         },
         {
-            url: `${baseUrl}/admin`,
+            url: `${baseUrl}admin`,
             lastModified: new Date(),
             priority: 0.63,
             images: baseImage
@@ -54,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/events/${event.slug}`,
         lastModified: new Date(),
         priority: 0.76,
-        images: `${baseUrl}/_next/image?url=%2F${event.image}&w=1080&q=75` || baseImage
+        images: `${baseUrl}_next/image?url=%2F${event.image}&w=1080&q=75` || baseImage
     }));
 
     return [...staticRoutes, ...eventRoutes];

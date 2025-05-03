@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 // Page component
 export default async function EventsPage() {
   try {
-    const apiUrl = `${baseUrl}/api/events`
+    const apiUrl = `${baseUrl}api/events`
 
     // Use fetch with force-cache to enable static generation at build time
     const res = await fetch(apiUrl, { cache: 'force-cache' });

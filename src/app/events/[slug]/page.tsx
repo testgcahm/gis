@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 // Helper to fetch events list
 async function fetchEvents(): Promise<EventData[]> {
   try {
-    const apiUrl = `${baseUrl}/api/events`
+    const apiUrl = `${baseUrl}api/events`
 
     // Use fetch with force-cache for static generation
     const res = await fetch(apiUrl, { cache: 'force-cache' });
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: "Event Not Found | GMC Islamic Society" };
   }
 
-  const url = `${baseUrl}/events/${event.slug}`;
+  const url = `${baseUrl}events/${event.slug}`;
   return {
     title: `${event.title} | GMC Islamic Society`,
     description: event.description.replace(/\n/g, ' '),
