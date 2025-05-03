@@ -2,8 +2,5 @@
 User-agent: *
 Allow: /
 
-# Host
-Host: https://gmc-islamic-society.vercel.app
-
 # Sitemaps
 Sitemap: https://gmc-islamic-society.vercel.app/sitemap.xml
