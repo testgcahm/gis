@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 interface SubeventSpeaker {
     name: string;
     bio: string;
+    id: string; // Unique id for React key
 }
 
 interface SubeventSpeakersSectionProps {
@@ -14,16 +15,16 @@ interface SubeventSpeakersSectionProps {
 }
 
 const SubeventSpeakersSection: React.FC<SubeventSpeakersSectionProps> = ({ speakers, onChange, onAdd, onRemove }) => (
-    <div className="ml-2">
+    <div className="ml-2 mt-3">
         <label className="text-secondary my-2 font-semibold">Speakers</label>
         <div className="space-y-1">
             {speakers.map((sp, sidx) => (
-                <div key={sidx} className="flex flex-col mt-2 sm:flex-row gap-2 max-sm:mb-5 items-center">
+                <div key={sp.id || sidx} className="flex flex-col mt-2 sm:flex-row gap-2 max-sm:mb-5 items-center">
                     <input
                         type="text"
                         value={sp.name || ""}
                         onChange={e => onChange(sidx, "name", e.target.value)}
-                        className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
+                        className="w-full p-3 bg-white border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
                         placeholder="Speaker Name"
                         required
                     />
@@ -31,7 +32,7 @@ const SubeventSpeakersSection: React.FC<SubeventSpeakersSectionProps> = ({ speak
                         type="text"
                         value={sp.bio || ""}
                         onChange={e => onChange(sidx, "bio", e.target.value)}
-                        className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
+                        className="w-full p-3 bg-white border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
                         placeholder="Speaker Bio"
                         required
                     />

@@ -4,6 +4,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MoveVertical } from "lucide-react";
+import { SimpleSpinner } from "../Spinner";
 
 interface SubeventWithError {
     time: string;
@@ -12,6 +13,8 @@ interface SubeventWithError {
     imageUrl?: string;
     speakers?: { name: string; bio: string }[];
     imageError?: string;
+    order?: number;
+    id: string; // Unique id for React key and dnd-kit
 }
 
 interface SubeventsSectionProps {
@@ -52,7 +55,7 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
     }
 
     // Give each subevent a unique id for dnd-kit
-    const items = subevents.map((_, idx) => idx.toString());
+    const items = subevents.map(sub => sub.id);
     return (
         <div>
             <label className="block text-primary font-semibold text-xl mb-2">Event Segments (Subevents)</label>
@@ -60,20 +63,22 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                 <SortableContext items={items} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2">
                         {subevents.map((sub, idx) => {
-                            const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: idx.toString() });
+                            // Ensure all speakers have an id
+                            const speakersWithId = (sub.speakers || []).map((sp: any) => ({ ...sp, id: sp.id || Date.now().toString() + Math.random().toString(36).slice(2) }));
+                            const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: sub.id });
                             const style = {
                                 transform: CSS.Transform.toString(transform),
                                 transition,
                                 opacity: isDragging ? 0.5 : 1,
                             };
                             return (
-                                <SortableSubeventItem key={idx} sub={sub} idx={idx} setNodeRef={setNodeRef} attributes={attributes} listeners={listeners} style={style}>
+                                <SortableSubeventItem key={sub.id} sub={sub} idx={idx} setNodeRef={setNodeRef} attributes={attributes} listeners={listeners} style={style}>
                                     <div className="flex flex-col sm:flex-row gap-2 mb-2">
                                         <input
                                             type="text"
                                             value={sub.time || ""}
                                             onChange={e => handleSubeventChange(idx, "time", e.target.value)}
-                                            className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
+                                            className="w-full p-3 bg-white border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
                                             placeholder="Time (e.g. 10:00 AM)"
                                             required
                                         />
@@ -81,7 +86,7 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                                             type="text"
                                             value={sub.title || ""}
                                             onChange={e => handleSubeventChange(idx, "title", e.target.value)}
-                                            className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
+                                            className="w-full p-3 bg-white border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
                                             placeholder="Segment Title"
                                             required
                                         />
@@ -108,21 +113,21 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                                                 {subeventImageErrors[idx]}
                                             </p>
                                         )}
-                                        {subeventUploading[idx] && <span className="text-xs text-gray-500">Uploading...</span>}
+                                        {subeventUploading && <div className="p-1"><SimpleSpinner className='w-5 h-5' /></div>}
                                         {sub.imageUrl && sub.imageUrl !== 'uploading' && (
-                                            <img src={sub.imageUrl} alt="Segment" className="mt-2 max-h-24 rounded" />
+                                            <img src={sub.imageUrl} title="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
                                         )}
                                     </div>
                                     <textarea
                                         value={sub.description || ""}
                                         onChange={e => handleSubeventChange(idx, "description", e.target.value)}
-                                        className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
+                                        className="w-full bg-white p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
                                         placeholder="Segment Description"
                                         rows={2}
                                         required
                                     />
                                     <SubeventSpeakersSection
-                                        speakers={sub.speakers || []}
+                                        speakers={speakersWithId}
                                         onChange={(sidx, field, value) => handleSubeventSpeakerChange(idx, sidx, field, value)}
                                         onAdd={() => handleAddSubeventSpeaker(idx)}
                                         onRemove={sidx => handleRemoveSubeventSpeaker(idx, sidx)}

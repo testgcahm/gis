@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { EventData } from "@/components/events/types";
 import SpeakersSection from "./SpeakersSection";
 import SubeventsSection from "./SubeventsSection";
@@ -6,15 +6,23 @@ import { FolderType } from "@/types/googleDrive";
 import { arrayMove } from "@dnd-kit/sortable";
 import { SimpleSpinner } from "../Spinner";
 
-// Define a local interface for subevents with imageError
+// Define a SubeventSpeaker interface with an id
+interface SubeventSpeaker {
+    name: string;
+    bio: string;
+    id: string;
+}
+
+// Update SubeventWithError to use SubeventSpeaker
 interface SubeventWithError {
     time: string;
     title: string;
     description?: string;
     imageUrl?: string;
-    speakers?: { name: string; bio: string }[];
+    speakers?: SubeventSpeaker[];
     imageError?: string;
     order?: number; // For drag-and-drop reordering
+    id: string; // Unique id for React key and dnd-kit
 }
 
 type EventFormProps = {
@@ -42,21 +50,45 @@ export default function EventForm({
     handleRemoveSpeaker,
     handleCancel,
 }: EventFormProps) {
-    // Use subevents as SubeventWithError[] for all operations
-    const subevents: SubeventWithError[] = (form.subevents as SubeventWithError[]) || [];
+    // Store a stable reference to a counter for generating unique IDs
+    const idCounterRef = useRef(0);
+    const getNextId = (prefix: string) => `${prefix}-${++idCounterRef.current}`;
+    
+    // Create a stable ID generator function that doesn't use Date.now()
+    const generateUniqueId = (prefix: string) => `${prefix}-${++idCounterRef.current}-${Math.random().toString(36).slice(2)}`;
+    
+    // Generate stable IDs for subevents and speakers (only when form.subevents changes)
+    const normalizedSubevents = useMemo(() => {
+        // Track which items already have IDs to avoid changing them
+        const idCache = new Map();
+        
+        return ((form.subevents as any[]) || []).map(sub => {
+            // Keep existing IDs stable, only generate new ones when needed
+            const subId = sub.id || getNextId('subevent');
+            
+            // Process speakers with stable ID handling
+            const speakers = (sub.speakers || []).map((sp: any) => {
+                const speakerId = sp.id || getNextId('speaker');
+                return { ...sp, id: speakerId };
+            });
+            
+            return { ...sub, id: subId, speakers };
+        });
+    }, [form.subevents]);
+    
     // Local state for subevent image uploading and errors
-    const [subeventUploading, setSubeventUploading] = useState<boolean[]>(Array(subevents.length).fill(false));
-    const [subeventImageErrors, setSubeventImageErrors] = useState<string[]>(Array(subevents.length).fill(""));
+    const [subeventUploading, setSubeventUploading] = useState<boolean[]>(Array(normalizedSubevents.length).fill(false));
+    const [subeventImageErrors, setSubeventImageErrors] = useState<string[]>(Array(normalizedSubevents.length).fill(""));
 
     // Main event image upload state
     const [mainImageUploading, setMainImageUploading] = useState(false);
     const [mainImageError, setMainImageError] = useState("");
 
     // Sync state arrays if subevents length changes
-    React.useEffect(() => {
-        setSubeventUploading(arr => arr.length === subevents.length ? arr : Array(subevents.length).fill(false));
-        setSubeventImageErrors(arr => arr.length === subevents.length ? arr : Array(subevents.length).fill(""));
-    }, [subevents.length]);
+    useEffect(() => {
+        setSubeventUploading(arr => arr.length === normalizedSubevents.length ? arr : Array(normalizedSubevents.length).fill(false));
+        setSubeventImageErrors(arr => arr.length === normalizedSubevents.length ? arr : Array(normalizedSubevents.length).fill(""));
+    }, [normalizedSubevents.length]);
 
     // Dedicated handler for subevent image upload
     const handleSubeventImageChange = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
@@ -112,34 +144,49 @@ export default function EventForm({
     // Subevent state and handlers remain
     // Subevent speaker handlers
     const handleSubeventChange = (idx: number, field: string, value: any) => {
-        const updated = [...(form.subevents || [])];
+        const updated = [...normalizedSubevents];
         updated[idx] = { ...updated[idx], [field]: value };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
     const handleAddSubevent = () => {
-        const updated = [...(form.subevents || []), { time: '', title: '', description: '', speakers: [] }];
+        const updated = [
+            ...normalizedSubevents,
+            { 
+                time: '', 
+                title: '', 
+                description: '', 
+                speakers: [], 
+                id: generateUniqueId('subevent')
+            }
+        ];
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
     const handleRemoveSubevent = (idx: number) => {
-        const updated = [...(form.subevents || [])];
+        const updated = [...normalizedSubevents];
         updated.splice(idx, 1);
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
+
     const handleSubeventSpeakerChange = (subIdx: number, sIdx: number, field: "name" | "bio", value: string) => {
-        const updated = [...(form.subevents || [])];
-        const speakers = [...(updated[subIdx].speakers || [])];
+        const updated = [...normalizedSubevents];
+        const speakers = [...(updated[subIdx].speakers || [])]; 
         speakers[sIdx] = { ...speakers[sIdx], [field]: value };
         updated[subIdx] = { ...updated[subIdx], speakers };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
+
     const handleAddSubeventSpeaker = (subIdx: number) => {
-        const updated = [...(form.subevents || [])];
-        const speakers = [...(updated[subIdx].speakers || []), { name: '', bio: '' }];
+        const updated = [...normalizedSubevents];
+        const speakers = [
+            ...(updated[subIdx].speakers || []),
+            { name: '', bio: '', id: generateUniqueId('speaker') }
+        ];
         updated[subIdx] = { ...updated[subIdx], speakers };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
+
     const handleRemoveSubeventSpeaker = (subIdx: number, sIdx: number) => {
-        const updated = [...(form.subevents || [])];
+        const updated = [...normalizedSubevents];
         const speakers = [...(updated[subIdx].speakers || [])];
         speakers.splice(sIdx, 1);
         updated[subIdx] = { ...updated[subIdx], speakers };
@@ -188,9 +235,10 @@ export default function EventForm({
     const handleSubeventDragEnd = (event: any) => {
         const { active, over } = event;
         if (!over || active.id === over.id) return;
-        const oldIndex = parseInt(active.id, 10);
-        const newIndex = parseInt(over.id, 10);
-        const updated = arrayMove(subevents, oldIndex, newIndex).map((sub, i) => ({ ...sub, order: i }));
+        const oldIndex = normalizedSubevents.findIndex(sub => sub.id === active.id);
+        const newIndex = normalizedSubevents.findIndex(sub => sub.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
+        const updated = arrayMove(normalizedSubevents, oldIndex, newIndex).map((sub, i) => ({ ...sub, order: i }));
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
 
@@ -242,7 +290,7 @@ export default function EventForm({
                     <label htmlFor="time" className="block text-primary font-semibold mb-1">Time <span className='text-red-500'>*</span></label>
                     <input id="time" name="time" value={form.time || ""} onChange={handleChange} className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black" required />
                 </div>
-                <div>
+                <div className="w-full sm:col-span-2">
                     <label htmlFor="venue" className="block text-primary font-semibold mb-1">Venue <span className='text-red-500'>*</span></label>
                     <input id="venue" name="venue" value={form.venue || ""} onChange={handleChange} className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black" required />
                 </div>
@@ -328,7 +376,7 @@ export default function EventForm({
                 handleRemoveSpeaker={handleRemoveSpeaker}
             />
             <SubeventsSection
-                subevents={subevents}
+                subevents={normalizedSubevents}
                 subeventUploading={subeventUploading}
                 subeventImageErrors={subeventImageErrors}
                 handleSubeventImageChange={handleSubeventImageChange}
