@@ -91,11 +91,36 @@ const EventDetails = ({ event }: EventDetailsProps) => {
               <span dangerouslySetInnerHTML={{ __html: event.description.replace(/\n/g, '<br />') }} />
             </div>
           </section>
+          {/* Subevents Section */}
+          {event.subevents && event.subevents.length > 0 && (
+            <section>
+              <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-primary-800 border-b border-primary-200 pb-2">Event Segments</h3>
+              <div className="space-y-4 mt-4">
+                {event.subevents.map((sub, idx) => (
+                  <div key={idx} className="border-l-4 border-primary-400 pl-4 py-2 bg-primary-50 rounded">
+                    <div className="font-bold text-primary-700">{sub.time} - {sub.title}</div>
+                    {sub.description && <div className="text-gray-700 mt-1">{sub.description}</div>}
+                    {sub.speakers && sub.speakers.length > 0 && (
+                      <div className="mt-2">
+                        <span className="font-semibold text-secondary">Speakers:</span>
+                        <ul className="list-disc ml-5">
+                          {sub.speakers.map((sp, i) => (
+                            <li key={i}><span className="font-medium">{sp.name}</span>{sp.bio && ` — ${sp.bio}`}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {/* Speakers Section */}
           {event.speakers && event.speakers.length > 0 && (
             <section>
               <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-secondary-800 border-b border-primary-200 pb-2">Speakers</h3>
               <div className="space-y-4 md:space-y-5 mt-4">
-                {event.speakers.map((speaker, idx) => (
+                {event.speakers.map((speaker: any, idx: number) => (
                   <div key={idx}>
                     <span className="font-semibold text-base sm:text-lg text-secondary">{speaker.name}</span>
                     <p className="text-gray-700 text-sm sm:text-base mt-1">{speaker.bio}</p>

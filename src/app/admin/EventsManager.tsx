@@ -92,6 +92,24 @@ export default function EventsManager() {
         setLoading(true);
         setError(null);
         try {
+            // Slug logic
+            let slug = form.slug?.trim() || form.title?.toLowerCase().replace(/\s+/g, "-");
+            if (!slug) throw new Error("Title is required.");
+            // Prevent duplicate slugs (ignore current event if editing)
+            const duplicate = events.find(ev => ev.slug === slug && (!editing || ev.id !== editing.id));
+            if (duplicate) {
+                setError("An event with this title already exists.");
+                setLoading(false);
+                return;
+            }
+            let submitForm = { ...form, slug };
+            // If adding, assign order 0 and increment others
+            if (!editing) {
+                submitForm.order = 0;
+                // Increment order of all existing events
+                const updatedEvents = events.map(ev => ({ ...ev, order: (typeof ev.order === 'number' ? ev.order + 1 : 1) }));
+                setEvents([submitForm as EventData, ...updatedEvents]);
+            }
             const method = editing ? "PUT" : "POST";
             const idToken = await getIdToken();
             if (!idToken) throw new Error("You must be logged in to perform this action.");
@@ -101,7 +119,7 @@ export default function EventsManager() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${idToken}`,
                 },
-                body: JSON.stringify(editing ? form : { ...form, slug: form.slug?.trim() || form.title?.toLowerCase().replace(/\s+/g, "-") }),
+                body: JSON.stringify(editing ? submitForm : submitForm),
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error || "Unknown error");

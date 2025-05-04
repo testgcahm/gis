@@ -1,7 +1,7 @@
 import { EventData } from "@/components/events/types";
-import EventClient from "./EventClient";
 import { baseUrl } from "@/components/utils";
 import { notFound } from "next/navigation";
+import EventDetails from "@/components/events/EventDetails";
 
 // Helper to fetch events list
 async function fetchEvents(): Promise<EventData[]> {
@@ -88,5 +88,5 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
     notFound();
   }
 
-  return <EventClient event={event} />;
+  return <EventDetails event={event} />;
 }

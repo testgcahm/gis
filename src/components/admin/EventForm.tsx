@@ -183,7 +183,6 @@ export default function EventForm({
         }
         setMainImageUploading(false);
     };
-    console.log("Form data: ", form.image);
 
     // Handle subevent drag end (reorder)
     const handleSubeventDragEnd = (event: any) => {
@@ -195,6 +194,25 @@ export default function EventForm({
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
 
+    // Slug auto-update logic
+    React.useEffect(() => {
+        // Only update slug if user hasn't manually changed it
+        const autoSlug = (form.title || "").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+        if (
+            (form.slug === undefined || form.slug === "" || form.slug === autoSlug) &&
+            form.title &&
+            form.title.trim() !== ""
+        ) {
+            handleChange({
+                target: {
+                    name: "slug",
+                    value: autoSlug,
+                    type: "text"
+                }
+            } as any);
+        }
+    }, [form.title]);
+
     return (
         <form onSubmit={handleSubmit} className="bg-white border-l-4 border-secondary rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.15)] p-8 mb-10 w-full max-w-2xl space-y-5 transition-all duration-700">
             <h2 className="text-2xl font-extrabold text-primary mb-4 drop-shadow-sm">{editing ? "Edit Event" : "Add Event"}</h2>
@@ -202,6 +220,19 @@ export default function EventForm({
                 <div>
                     <label htmlFor="title" className="block text-primary font-semibold mb-1">Title <span className='text-red-500'>*</span></label>
                     <input id="title" name="title" value={form.title || ""} onChange={handleChange} className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black" required />
+                </div>
+                <div>
+                    <label htmlFor="slug" className="block text-primary font-semibold mb-1">Url <span className='text-red-500'>*</span></label>
+                    <input
+                        id="slug"
+                        name="slug"
+                        value={form.slug || ""}
+                        onChange={handleChange}
+                        className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
+                        placeholder="Auto-generated from title or set manually"
+                        required
+                    />
+                    <span className="text-xs text-gray-500">If you want to auto-update the url from the title, clear this field.</span>
                 </div>
                 <div>
                     <label htmlFor="date" className="block text-primary font-semibold mb-1">Date <span className='text-red-500'>*</span></label>

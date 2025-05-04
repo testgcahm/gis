@@ -12,7 +12,17 @@ export default function EventsClient({ events }: EventsClientProps) {
   // Ensure events is always an array
   const safeEvents = Array.isArray(events) ? events : [];
 
-  if (safeEvents.length === 0) {
+  // Sort events by 'order' property (ascending), missing order goes last
+  const sortedEvents = [...safeEvents].sort((a, b) => {
+    if (typeof a.order === 'number' && typeof b.order === 'number') {
+      return a.order - b.order;
+    }
+    if (typeof a.order === 'number') return -1;
+    if (typeof b.order === 'number') return 1;
+    return 0;
+  });
+
+  if (sortedEvents.length === 0) {
     return <div className="text-center text-red-600 text-3xl font-bold my-20">No events found.</div>;
   }
 
@@ -25,7 +35,7 @@ export default function EventsClient({ events }: EventsClientProps) {
     >
       <h1 className="text-4xl font-extrabold text-primary-700 mb-8 text-center">Events</h1>
       <div className="grid gap-10 w-full max-w-4xl">
-        {safeEvents.map((event) => (
+        {sortedEvents.map((event) => (
           <div key={event.slug}>
             <EventCard event={event} />
           </div>
