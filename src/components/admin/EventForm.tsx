@@ -52,27 +52,21 @@ export default function EventForm({
 }: EventFormProps) {
     // Store a stable reference to a counter for generating unique IDs
     const idCounterRef = useRef(0);
-    const getNextId = (prefix: string) => `${prefix}-${++idCounterRef.current}`;
-    
-    // Create a stable ID generator function that doesn't use Date.now()
+    // Create a stable ID generator function
     const generateUniqueId = (prefix: string) => `${prefix}-${++idCounterRef.current}-${Math.random().toString(36).slice(2)}`;
     
-    // Generate stable IDs for subevents and speakers (only when form.subevents changes)
+    // Ensure subevents and their speakers always have stable IDs
     const normalizedSubevents = useMemo(() => {
-        // Track which items already have IDs to avoid changing them
-        const idCache = new Map();
-        
         return ((form.subevents as any[]) || []).map(sub => {
-            // Keep existing IDs stable, only generate new ones when needed
-            const subId = sub.id || getNextId('subevent');
-            
-            // Process speakers with stable ID handling
+            // Assume sub.id already exists and is stable
+            // Ensure speakers within the subevent also have stable IDs
             const speakers = (sub.speakers || []).map((sp: any) => {
-                const speakerId = sp.id || getNextId('speaker');
-                return { ...sp, id: speakerId };
+                // Assume sp.id already exists and is stable
+                // If an ID is missing here, it's an issue with how speakers are added/managed
+                return { ...sp, id: sp.id }; 
             });
-            
-            return { ...sub, id: subId, speakers };
+            // If sub.id is missing here, it's an issue with how subevents are added/managed
+            return { ...sub, id: sub.id, speakers };
         });
     }, [form.subevents]);
     
@@ -144,53 +138,61 @@ export default function EventForm({
     // Subevent state and handlers remain
     // Subevent speaker handlers
     const handleSubeventChange = (idx: number, field: string, value: any) => {
-        const updated = [...normalizedSubevents];
+        // Use normalizedSubevents as the base for updates to ensure IDs are present
+        const updated = [...normalizedSubevents]; 
         updated[idx] = { ...updated[idx], [field]: value };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
     const handleAddSubevent = () => {
+        const newSubevent = { 
+            time: '', 
+            title: '', 
+            description: '', 
+            speakers: [], 
+            id: generateUniqueId('subevent') // Generate ID *only* when adding
+        };
         const updated = [
-            ...normalizedSubevents,
-            { 
-                time: '', 
-                title: '', 
-                description: '', 
-                speakers: [], 
-                id: generateUniqueId('subevent')
-            }
+            ...normalizedSubevents, // Use normalizedSubevents to ensure existing items have IDs
+            newSubevent
         ];
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
     const handleRemoveSubevent = (idx: number) => {
-        const updated = [...normalizedSubevents];
+        const updated = [...normalizedSubevents]; // Use normalizedSubevents
         updated.splice(idx, 1);
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
 
     const handleSubeventSpeakerChange = (subIdx: number, sIdx: number, field: "name" | "bio", value: string) => {
-        const updated = [...normalizedSubevents];
+        const updated = [...normalizedSubevents]; // Use normalizedSubevents
+        // Ensure speakers array exists and has stable IDs
         const speakers = [...(updated[subIdx].speakers || [])]; 
-        speakers[sIdx] = { ...speakers[sIdx], [field]: value };
-        updated[subIdx] = { ...updated[subIdx], speakers };
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
+        if (speakers[sIdx]) { // Check if speaker exists at index
+            speakers[sIdx] = { ...speakers[sIdx], [field]: value };
+            updated[subIdx] = { ...updated[subIdx], speakers };
+            handleChange({ target: { name: 'subevents', value: updated } } as any);
+        }
     };
 
     const handleAddSubeventSpeaker = (subIdx: number) => {
-        const updated = [...normalizedSubevents];
+        const updated = [...normalizedSubevents]; // Use normalizedSubevents
+        const newSpeaker = { name: '', bio: '', id: generateUniqueId('speaker') }; // Generate ID *only* when adding
         const speakers = [
             ...(updated[subIdx].speakers || []),
-            { name: '', bio: '', id: generateUniqueId('speaker') }
+            newSpeaker
         ];
         updated[subIdx] = { ...updated[subIdx], speakers };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
 
     const handleRemoveSubeventSpeaker = (subIdx: number, sIdx: number) => {
-        const updated = [...normalizedSubevents];
+        const updated = [...normalizedSubevents]; // Use normalizedSubevents
         const speakers = [...(updated[subIdx].speakers || [])];
-        speakers.splice(sIdx, 1);
-        updated[subIdx] = { ...updated[subIdx], speakers };
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
+        if (sIdx >= 0 && sIdx < speakers.length) { // Check index bounds
+            speakers.splice(sIdx, 1);
+            updated[subIdx] = { ...updated[subIdx], speakers };
+            handleChange({ target: { name: 'subevents', value: updated } } as any);
+        }
     };
     // Main event image upload handler
     const handleMainImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -23,7 +23,7 @@ export interface EventData {
     order?: number; // Added for sorting and reordering
     speakers?: {
       name: string;
-      bio: string;
+      bio?: string;
     }[];
   }[];
   order?: number; // Added for sorting and reordering
