@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useState } from 'react';
 import { EventData, Subevent, Speaker } from './types';
@@ -66,15 +66,15 @@ const EventCard = ({ event }: EventCardProps) => {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className="relative border border-primary-200/40 rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 bg-white/80"
+        className="relative border border-primary-200/40 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 bg-white/80"
       >
-        <div className="flex flex-col lg:flex-row">
+        <div className="flex flex-col max-[750px]:pb-3 max-[550px]:pb-[18px] lg:flex-row">
           <div
             className="h-48 lg:h-auto lg:w-48 flex-none bg-cover bg-center text-center overflow-hidden"
             style={{ backgroundImage: `url('${event.image}')` }}
             title={event.title}
           ></div>
-          <div className="p-4 flex flex-col justify-between leading-normal flex-grow">
+          <div className="pt-4 px-4 flex flex-col justify-between leading-normal flex-grow">
             <div className="mb-4 lg:mb-8">
               <p className="text-sm text-gray-600 flex items-center mb-1">
                 <svg className="fill-current text-gray-500 w-3 h-3 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -115,7 +115,7 @@ const EventCard = ({ event }: EventCardProps) => {
 
         {/* Segment Toggle Button - Made circular */}
         {hasSegments && (
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-[500]"> {/* Removed translate-y-1/2 */}
+          <div className="absolute -bottom-0 left-1/2 z-40 transform -translate-x-1/2 translate-y-1/2">
             <button
               onClick={() => setShowSegments(!showSegments)}
               className="p-2 bg-primary-500 hover:bg-primary-600 text-white rounded-full shadow-md focus:outline-none transition-transform duration-300"
@@ -133,19 +133,21 @@ const EventCard = ({ event }: EventCardProps) => {
         )}
 
         {/* Segments Section - Layout adapted from EventDetails */}
+        <AnimatePresence initial={false}>
         {hasSegments && showSegments && (
           <motion.div
             id={`segments-${event.slug}`}
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: 'auto', opacity: 1, marginTop: '2rem' }} // Add margin top when shown
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden px-4 pb-4 pt-2 relative"
+            layout
+            initial={{ opacity: 0, y: -16, marginTop: 0 }}
+            animate={{ opacity: 1, y: 0, marginTop: '2rem' }}
+            exit={{ opacity: 0, y: -16, marginTop: 0 }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            className="overflow-hidden px-4 pb-4 relative"
           >
             {/* Connecting Line */}
             <div className="absolute top-0 left-1/2 w-px h-8 bg-primary-300 -translate-x-1/2 -translate-y-full"></div>
 
-            <h3 className="text-lg font-semibold text-primary-600 mb-4 text-center">Segments</h3>
+            <h3 className="text-xl font-bold text-primary-600 mb-4 text-center">Segments</h3>
             <div className="space-y-4">
               {sortedSubevents.map((segment: Subevent, index: number) => (
                 // Use layout similar to EventDetails
@@ -187,6 +189,7 @@ const EventCard = ({ event }: EventCardProps) => {
             </div>
           </motion.div>
         )}
+        </AnimatePresence>
       </motion.div>
     </>
   );
