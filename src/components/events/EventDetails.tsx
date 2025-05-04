@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { LocationIcon } from '../footer/FooterIcons';
-import Image from 'next/image';
 import { useState } from 'react';
 import { EventData } from './types';
 import Link from 'next/link';
@@ -59,7 +58,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
         <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-center justify-center">
           <img
             src={event.image}
-            alt={event.title}
+            alt={event.image}
             width={500}
             height={350}
             className="w-full min-[500px]:min-w-[400px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg object-contain h-auto rounded-xl shadow border border-primary-100 bg-white"
