@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { LocationIcon } from '@/components/footer/FooterIcons';
-import Image from 'next/image';
 import { useState } from 'react';
 import React from 'react';
 import { EventData } from '@/components/events/types';
@@ -58,7 +57,7 @@ export default function EventClient({ event }: EventClientProps) {
       </h2>
       <div className="flex flex-col min-[975px]:space-x-8 min-[975px]:flex-row min-[975px]:items-start items-center justify-center">
         <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-center justify-center">
-          <Image
+          <img
             src={event.image}
             alt={event.title}
             width={500}

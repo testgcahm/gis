@@ -58,7 +58,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
         <div className="mb-8 min-[975px]:mb-0 flex-col max-w-[500px] space-y-6 w-full flex items-center justify-center">
           <img
             src={event.image}
-            alt={event.image}
+            alt={event.title}
             width={500}
             height={350}
             className="w-full min-[500px]:min-w-[400px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg object-contain h-auto rounded-xl shadow border border-primary-100 bg-white"
@@ -67,7 +67,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
         <div className="w-full min-[975px]:min-w-[520px] min-[975px]:max-w-[750px] max-[975px]:max-w-[750px] border border-primary-300 p-8 max-[450px]:p-4 rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.3)] flex flex-col gap-6 md:gap-8 bg-white">
           <section>
             <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-primary-900 border-b border-primary-200 pb-2 flex flex-col items-center">
-              Event Information {event.image}
+              Event Information
             </h3>
             <ul className="list-none pl-0 space-y-3 md:space-y-4 text-gray-800 text-sm sm:text-base md:text-lg mb-3">
               <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Calendar */}
