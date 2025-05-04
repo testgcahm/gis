@@ -28,3 +28,17 @@ export interface EventData {
   }[];
   order?: number; // Added for sorting and reordering
 }
+
+export interface Speaker {
+  name: string;
+  bio?: string;
+}
+
+export interface Subevent {
+  time: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  order?: number;
+  speakers?: Speaker[];
+}
