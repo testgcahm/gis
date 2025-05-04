@@ -245,7 +245,7 @@ export default function EventForm({
                 )}
                 {mainImageUploading && <div className="p-1"><SimpleSpinner className='w-5 h-5' /></div>}
                 {form.image && form.image !== 'uploading' && (
-                    <img src={form.image} title="Event" className="mt-2 max-h-24 rounded w-full" />
+                    <img src={form.image} title="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
                 )}
             </div>
             <div>
