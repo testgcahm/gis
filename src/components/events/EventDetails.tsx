@@ -14,6 +14,7 @@ interface EventDetailsProps {
 const EventDetails = ({ event }: EventDetailsProps) => {
 
   const [copied, setCopied] = useState(false);
+  console.log(event.image)
 
   const onShare = async () => {
     const url = `${window.location.origin}/events/${event.slug}`;
