@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Copy } from 'lucide-react';
 import useInView from '../../components/useInView';
 import { motion } from 'framer-motion';
+import { FolderType } from '../../types/googleDrive';
 
 const GOOGLE_FORM_URL = process.env.NEXT_PUBLIC_GOOGLE_FORM_SUBMIT_URL;
 const ENTRY_NAME = "entry.1649783382";
@@ -33,6 +34,7 @@ const RegisterClient: React.FC = () => {
         category: '',
         institute: '',
         fileUrl: '',
+        folderType: FolderType.Register
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [errors, setErrors] = useState({
@@ -93,7 +95,7 @@ const RegisterClient: React.FC = () => {
             category: CATEGORY_OPTIONS.includes(formData.category) ? '' : 'Select category.',
             institute: formData.institute.trim() ? '' : 'Institute is required.',
             fileUrl: '',
-            imageFile: imageFile ? '' : 'Image is required.'
+            imageFile: imageFile ? '' : 'Image is required.',
         };
         setErrors(newErrors);
         return newErrors;
@@ -117,6 +119,7 @@ const RegisterClient: React.FC = () => {
         try {
             const form = new FormData();
             form.append('image', imageFile!);
+            form.append('folderType', formData.folderType); // NEW
             const res = await fetch('/api/image-upload', {
                 method: 'POST',
                 body: form,
@@ -138,7 +141,7 @@ const RegisterClient: React.FC = () => {
                 method: 'POST',
             });
             setSuccessMessage('Registration submitted successfully!');
-            setFormData({ name: '', father: '', gender: '', email: '', phone: '', cnic: '', category: '', institute: '', fileUrl: '' });
+            setFormData({ name: '', father: '', gender: '', email: '', phone: '', cnic: '', category: '', institute: '', fileUrl: '', folderType: FolderType.Register });
             setImageFile(null);
             setTimeout(() => setSuccessMessage(null), 3000);
         } catch (error) {
@@ -262,7 +265,7 @@ const RegisterClient: React.FC = () => {
                                         ref={inputRef}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={inputInView ? { opacity: 1, y: 0 } : {}}
-                                        transition={{ duration: 0.5, delay: 0.05 * idx }}
+                                        transition={{ duration: 0.5, delay: 0.05 }}
                                         className="w-full"
                                     >
                                         <label className="block text-primary font-semibold mb-1">{field.label} {field.required && <span className="text-red-500">*</span>}</label>

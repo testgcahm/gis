@@ -7,6 +7,22 @@ import { signInWithPopup } from 'firebase/auth'
 import Spinner, { SimpleSpinner } from '@/components/Spinner'
 import { motion } from 'framer-motion'
 import { User } from 'lucide-react'
+import Link from 'next/link'
+
+let ALLOWED_EMAILS = [
+    'abidahmed094@gmail.com',
+    'muhammadosama1515@gmail.com'
+];
+
+const MERGE_EMAILS = [
+    'abidahmed094@gmail.com',
+    'muhammadosama1515@gmail.com',
+    'hamzazubair.3111@gmail.com',
+    'gmcislamicsociety1199@gmail.com',
+    'aqsa59759@gmail.com'
+];
+
+const allEmails = false
 
 const EventsPage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,6 +33,11 @@ const EventsPage = () => {
     const profileRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const [allowed, setAllowed] = useState(false);
+    const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+    const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+
+    const allowedEmails = allEmails ? MERGE_EMAILS : ALLOWED_EMAILS;
     // Add ref for scroll position
     const scrollPositionRef = useRef(0);
 
@@ -25,12 +46,12 @@ const EventsPage = () => {
         if (typeof window !== 'undefined') {
             // Force scroll to top immediately
             window.scrollTo(0, 0);
-            
+
             // Disable scroll restoration for this page
             if ('scrollRestoration' in history) {
                 history.scrollRestoration = 'manual';
             }
-            
+
             // Also try with a slight delay
             setTimeout(() => {
                 window.scrollTo(0, 0);
@@ -46,11 +67,12 @@ const EventsPage = () => {
             if (typeof window !== 'undefined') {
                 scrollPositionRef.current = window.scrollY;
             }
-            
+
             setIsLoggedIn(!!user);
             setUserEmail(user?.email || null);
+            setAllowed(!!user && (allowedEmails.includes(user.email || '')));
             setChecking(false);
-            
+
             // Force scroll to top after auth check
             setTimeout(() => {
                 if (typeof window !== 'undefined') {
@@ -67,20 +89,20 @@ const EventsPage = () => {
             if (buttonRef.current && buttonRef.current.contains(event.target as Node)) {
                 return;
             }
-            
+
             // Close if clicking outside both the dropdown and button
             if (
-                dropdownRef.current && 
+                dropdownRef.current &&
                 !dropdownRef.current.contains(event.target as Node) &&
                 showDropdown
             ) {
                 setShowDropdown(false);
             }
         }
-        
+
         // Add listener to document
         document.addEventListener('mousedown', handleClickOutside, true);
-        
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside, true);
         };
@@ -110,81 +132,183 @@ const EventsPage = () => {
                     <Spinner />
                 </div>
             ) :
-                isLoggedIn ? (
-                    <div className="relative" ref={profileRef}>
-                        <div className='flex items-center justify-end p-4'>
-                            <button
-                                ref={buttonRef}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white focus:outline-none mb-2"
-                                onClick={() => setShowDropdown((v) => !v)}
-                                title="Profile"
-                            >
-                                <User className="w-6 h-6" />
-                            </button>
-                        </div>
-                        {showDropdown && (
-                            <div 
-                                ref={dropdownRef}
-                                className="absolute right-10 top-14 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 animate-fade-in"
-                            >
-                                <div className="px-4 py-3 border-b border-gray-100">
-                                    <p className="text-sm text-gray-700 font-semibold">{userEmail || 'No email'}</p>
+                isLoggedIn ?
+                    allowed ?
+                        (
+                            <div className="relative" ref={profileRef}>
+                                <div className='flex flex-row mt-2 w-full'>
+                                    {/* Publish centered, Profile at end */}
+                                    <div className="flex items-center w-full p-4 relative">
+                                        <div className="flex-1 flex justify-center">
+                                            <button
+                                                className="bg-green-600 disabled:bg-primary-300 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-2"
+                                                onClick={() => setShowPublishConfirm(true)}
+                                                disabled={loading}
+                                            >
+                                                {loading ? <SimpleSpinner /> : null}
+                                                <span>Publish</span>
+                                            </button>
+                                        </div>
+                                        <div className="absolute right-3">
+                                            <button
+                                                ref={buttonRef}
+                                                className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white focus:outline-none"
+                                                onClick={() => setShowDropdown((v) => !v)}
+                                                title="Profile"
+                                            >
+                                                <User className="w-6 h-6" />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+                                {showDropdown && (
+                                    <div
+                                        ref={dropdownRef}
+                                        className="absolute right-10 top-14 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 animate-fade-in"
+                                    >
+                                        <div className="px-4 py-3 border-b border-gray-100">
+                                            <p className="text-sm text-gray-700 font-semibold text-wrap break-all">{userEmail || 'No email'}</p>
+                                        </div>
+                                        <button
+                                            className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 rounded-b-lg"
+                                            onClick={handleLogout}
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
+                                <EventsManager />
+                            </div>
+                        ) : (
+                            <div className='flex flex-col items-center justify-center min-h-[80vh] bg-gray-100'>
+                                <h1 className="text-2xl text-primary-500 font-bold mb-4">Access Denied</h1>
+                                <p className="text-gray-700 mb-4">You do not have permission to access this page.</p>
+                                <p className="text-gray-700 mb-4">Please go to <Link href='/contact' className='text-primary font-semibold hover:font-bold'>Contact Page</Link> for more information.</p>
+                                {userEmail && (
+                                    <p className="text-sm text-gray-700 font-semibold text-wrap bg-white border-primary-300 border-2 p-2 rounded break-all mb-2">{userEmail}</p>
+                                )}
                                 <button
-                                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 rounded-b-lg"
+                                    className="bg-primary-500 hover:bg-primary-600 text-white font-bold px-3 py-[6px] mt-1 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-3 mb-2"
                                     onClick={handleLogout}
                                 >
                                     Logout
                                 </button>
                             </div>
-                        )}
-                        <EventsManager />
+                        ) : (
+                        <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gray-100">
+                            <h1 className="text-2xl text-primary-500 font-bold mb-4">Please log in to access the Events Manager</h1>
+                            <motion.button
+                                initial={{ scale: 0.8, opacity: 0, x: -40 }}
+                                animate={{ scale: 1, opacity: 1, x: 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                whileHover={{ scale: 1.05, x: 5 }}
+                                whileTap={{ scale: 0.97, x: -2 }}
+                                className="bg-primary-500 hover:bg-primary-600 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-3 mb-2"
+                                onClick={handleGoogleLogin}
+                                disabled={loading}
+                            >
+                                {loading ? <SimpleSpinner /> : (
+                                    <svg
+                                        viewBox="-3 0 262 262"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="w-6 h-6"
+                                    >
+                                        <g id="SVGRepo_bgCarrier" strokeWidth="0" />
+                                        <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" />
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path
+                                                d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+                                                fill="#4285F4"
+                                            />
+                                            <path
+                                                d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+                                                fill="#34A853"
+                                            />
+                                            <path
+                                                d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+                                                fill="#FBBC05"
+                                            />
+                                            <path
+                                                d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+                                                fill="#EB4335"
+                                            />
+                                        </g>
+                                    </svg>
+                                )}
+                                <span>Sign in</span>
+                            </motion.button>
+                        </div>
+                    )}
+            {/* Publish confirmation modal */}
+            {showPublishConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+                        <h2 className="text-xl font-bold mb-2 text-primary-700">Are you sure you want to continue?</h2>
+                        <p className="mb-4 text-gray-700">It will take about 2 minutes to publish changes.</p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none"
+                                onClick={async () => {
+                                    setShowPublishConfirm(false);
+                                    setLoading(true);
+                                    try {
+                                        const user = auth.currentUser;
+
+                                        if (!user) throw new Error('Not authenticated');
+                                        const token = await user.getIdToken();
+                                        const res = await fetch('/api/publish', {
+                                            method: 'GET',
+                                            headers: { 'Authorization': `Bearer ${token}` }
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            setPublishSuccess(data.message || 'Publish successful!');
+                                            setTimeout(() => setPublishSuccess(null), 3000);
+                                        } else {
+                                            alert(data.error || 'Publish failed.');
+                                        }
+                                    } catch (err: any) {
+                                        alert(err.message || 'Publish failed.');
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                                disabled={loading}
+                            >
+                                Yes, Publish
+                            </button>
+                            <button
+                                className="bg-gray-300 hover:bg-gray-400 text-primary-700 font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none"
+                                onClick={() => setShowPublishConfirm(false)}
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
-                ) : (
-                    <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gray-100">
-                        <h1 className="text-2xl text-primary-500 font-bold mb-4">Please log in to access the Events Manager</h1>
-                        <motion.button
-                            initial={{ scale: 0.8, opacity: 0, x: -40 }}
-                            animate={{ scale: 1, opacity: 1, x: 0 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                            whileHover={{ scale: 1.05, x: 5 }}
-                            whileTap={{ scale: 0.97, x: -2 }}
-                            className="bg-primary-500 hover:bg-primary-600 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-3 mb-2"
-                            onClick={handleGoogleLogin}
-                            disabled={loading}
-                        >
-                            {loading ? <SimpleSpinner /> : (
-                                <svg
-                                    viewBox="-3 0 262 262"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-6 h-6"
-                                >
-                                    <g id="SVGRepo_bgCarrier" strokeWidth="0" />
-                                    <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" />
-                                    <g id="SVGRepo_iconCarrier">
-                                        <path
-                                            d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
-                                            fill="#4285F4"
-                                        />
-                                        <path
-                                            d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
-                                            fill="#34A853"
-                                        />
-                                        <path
-                                            d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
-                                            fill="#FBBC05"
-                                        />
-                                        <path
-                                            d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
-                                            fill="#EB4335"
-                                        />
-                                    </g>
-                                </svg>
-                            )}
-                            <span>Sign in</span>
-                        </motion.button>
-                    </div>
-                )}
+                </div>
+            )}
+            {/* Publish success message */}
+            {publishSuccess && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    background: '#4ade80',
+                    color: '#065f46',
+                    padding: '12px 32px',
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    fontSize: '1.1rem',
+                    minWidth: '220px',
+                    textAlign: 'center',
+                }}>
+                    {publishSuccess}
+                </div>
+            )}
         </div>
     )
 }

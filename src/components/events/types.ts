@@ -1,4 +1,5 @@
 export interface EventData {
+  id?: string;
   slug: string;
   title: string;
   date: string;
@@ -9,8 +10,21 @@ export interface EventData {
   description: string;
   image: string;
   register?: boolean;
+  registrationLink?: string;
   speakers?: {
     name: string;
     bio: string;
   }[];
+  subevents?: {
+    time: string;
+    title: string;
+    description?: string;
+    imageUrl?: string;
+    order?: number; // Added for sorting and reordering
+    speakers?: {
+      name: string;
+      bio: string;
+    }[];
+  }[];
+  order?: number; // Added for sorting and reordering
 }

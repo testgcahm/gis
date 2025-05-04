@@ -82,9 +82,8 @@ export default function DraggableEventsList({
     handleDragEnd,
     handleSaveOrder,
 }: DraggableEventsListProps) {
-    // Create a reversed copy of events for display
-    const reversedEvents = [...events].reverse();
-    
+    // Always sort events by their 'order' property before rendering
+    const sortedEvents = [...events].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     return (
         <div className="w-full max-w-4xl">
             <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-4">All Events
@@ -94,10 +93,10 @@ export default function DraggableEventsList({
             </h2>
             {loading ? <div className="text-primary-700 pl-20 pt-10"><Spinner /></div> : (
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={reversedEvents.map(e => e.slug)} strategy={verticalListSortingStrategy}>
+                    <SortableContext items={sortedEvents.map(e => e.slug)} strategy={verticalListSortingStrategy}>
                         <div className="grid gap-6">
-                            {reversedEvents.length === 0 && <div className="text-gray-500">No events found.</div>}
-                            {reversedEvents.map((event) => (
+                            {sortedEvents.length === 0 && <div className="text-gray-500">No events found.</div>}
+                            {sortedEvents.map((event) => (
                                 <DraggableEvent key={event.slug} event={event} onEdit={handleEdit} onDelete={handleDelete} />
                             ))}
                         </div>

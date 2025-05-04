@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import React from 'react';
 import { EventData } from '@/components/events/types';
+import Link from 'next/link';
 
 interface EventClientProps {
   event: EventData | null;
@@ -92,6 +93,31 @@ export default function EventClient({ event }: EventClientProps) {
               <span dangerouslySetInnerHTML={{ __html: event.description.replace(/\n/g, '<br />') }} />
             </div>
           </section>
+          {/* Subevents Section */}
+          {event.subevents && event.subevents.length > 0 && (
+            <section>
+              <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-primary-800 border-b border-primary-200 pb-2">Event Segments</h3>
+              <div className="space-y-4 mt-4">
+                {event.subevents.map((sub, idx) => (
+                  <div key={idx} className="border-l-4 border-primary-400 pl-4 py-2 bg-primary-50 rounded">
+                    <div className="font-bold text-primary-700">{sub.time} - {sub.title}</div>
+                    {sub.description && <div className="text-gray-700 mt-1">{sub.description}</div>}
+                    {sub.speakers && sub.speakers.length > 0 && (
+                      <div className="mt-2">
+                        <span className="font-semibold text-secondary">Speakers:</span>
+                        <ul className="list-disc ml-5">
+                          {sub.speakers.map((sp, i) => (
+                            <li key={i}><span className="font-medium">{sp.name}</span>{sp.bio && ` — ${sp.bio}`}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {/* Speakers Section */}
           {event.speakers && event.speakers.length > 0 && (
             <section>
               <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-secondary-800 border-b border-primary-200 pb-2">Speakers</h3>
@@ -107,9 +133,9 @@ export default function EventClient({ event }: EventClientProps) {
           )}
           {event.register && (
             <div className="flex justify-center mt-4 md:mt-6">
-              <a href="/register">
+              <Link href={event.registrationLink || '/register'}>
                 <button className="bg-secondary hover:bg-secondary/90 text-white font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary/50 text-sm sm:text-base md:text-lg">Register for {event.title}</button>
-              </a>
+              </Link>
             </div>
           )}
         </div>

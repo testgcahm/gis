@@ -8,6 +8,7 @@ import DraggableEventsList from "@/components/admin/DraggableEventsList";
 import EventForm from "@/components/admin/EventForm";
 import { emptyEvent } from "@/components/admin/types";
 import { getAuth } from 'firebase/auth';
+import Spinner from "@/components/Spinner";
 
 export default function EventsManager() {
     const [events, setEvents] = useState<EventData[]>([]);
@@ -26,37 +27,19 @@ export default function EventsManager() {
         try {
             const res = await fetch("/api/events");
             const data = await res.json();
-            setEvents(data.eventsArray || []);
+            // Ensure each event has an id property
+            setEvents((data.eventsArray || []).map((e: any) => ({ ...e, id: e.id })));
         } catch (e) {
             setError("Failed to load events");
         }
         setLoading(false);
     };
 
-    // Force scroll to top with multiple approaches
+    // Force scroll to top
     useEffect(() => {
         // Immediate scroll
         if (typeof window !== "undefined") {
             window.scrollTo(0, 0);
-            
-            // Also try with a slight delay
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 0);
-            
-            // And again with a longer delay just to be sure
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                
-                // Also try to manually set scroll position of body and html
-                document.body.scrollTop = 0;
-                document.documentElement.scrollTop = 0;
-                
-                // Focus on container as a last resort
-                if (containerRef.current) {
-                    containerRef.current.focus();
-                }
-            }, 100);
         }
     }, []);
 
@@ -82,13 +65,13 @@ export default function EventsManager() {
         speakers[idx] = { ...speakers[idx], [field]: value };
         setForm({ ...form, speakers });
     };
-    
+
     const handleAddSpeaker = () => {
         const speakers = Array.isArray(form.speakers) ? [...form.speakers] : [];
         speakers.push({ name: "", bio: "" });
         setForm({ ...form, speakers });
     };
-    
+
     const handleRemoveSpeaker = (idx: number) => {
         const speakers = Array.isArray(form.speakers) ? [...form.speakers] : [];
         speakers.splice(idx, 1);
@@ -97,10 +80,10 @@ export default function EventsManager() {
 
     // Utility to get current user's ID token
     async function getIdToken() {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) return null;
-      return await user.getIdToken();
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return null;
+        return await user.getIdToken();
     }
 
     // Add or update event
@@ -177,7 +160,8 @@ export default function EventsManager() {
         if (active.id !== over?.id) {
             const oldIndex = events.findIndex(e => e.slug === active.id);
             const newIndex = events.findIndex(e => e.slug === over.id);
-            const newEvents = arrayMove(events, oldIndex, newIndex);
+            // Reorder and update the order property for each event
+            const newEvents = arrayMove(events, oldIndex, newIndex).map((e, i) => ({ ...e, order: i }));
             setEvents(newEvents);
             setOrderChanged(true);
         }
@@ -190,13 +174,14 @@ export default function EventsManager() {
         try {
             const idToken = await getIdToken();
             if (!idToken) throw new Error("You must be logged in to perform this action.");
+            // Use event.id for order
             const res = await fetch('/api/events', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`,
                 },
-                body: JSON.stringify({ order: events.map((e, i) => ({ id: (e as any).id, order: i })) }),
+                body: JSON.stringify({ order: events.map((e, i) => ({ id: e.id, order: i })) }),
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Unknown error');
@@ -249,9 +234,8 @@ export default function EventsManager() {
                     {successMessage}
                 </div>
             )}
-            
             {/* Event Form Component */}
-            <EventForm 
+            <EventForm
                 form={form}
                 editing={Boolean(editing)}
                 loading={loading}
@@ -263,17 +247,19 @@ export default function EventsManager() {
                 handleRemoveSpeaker={handleRemoveSpeaker}
                 handleCancel={handleCancel}
             />
-            
-            {/* Draggable Events List Component */}
-            <DraggableEventsList
-                events={events}
-                loading={loading}
-                orderChanged={orderChanged}
-                handleEdit={handleEdit}
-                handleDelete={handleDelete}
-                handleDragEnd={handleDragEnd}
-                handleSaveOrder={handleSaveOrder}
-            />
+            {loading ? (
+                <Spinner />
+            ) :
+                /* Draggable Events List Component */
+                <DraggableEventsList
+                    events={events}
+                    loading={loading}
+                    orderChanged={orderChanged}
+                    handleEdit={handleEdit}
+                    handleDelete={handleDelete}
+                    handleDragEnd={handleDragEnd}
+                    handleSaveOrder={handleSaveOrder}
+                />}
         </motion.div>
     );
 }

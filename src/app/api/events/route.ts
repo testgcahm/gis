@@ -3,12 +3,20 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
-const ALLOWED_EMAILS = [
+const merge = false;
+
+let ALLOWED_EMAILS = [
   'abidahmed094@gmail.com',
-  
+  'muhammadosama1515@gmail.com'
 ];
 
-const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL + '?buildCache=false';
+const MERGE_EMAILS = [
+  'abidahmed094@gmail.com',
+  'muhammadosama1515@gmail.com',
+  'hamzazubair.3111@gmail.com',
+  'gmcislamicsociety1199@gmail.com',
+  'aqsa59759@gmail.com'
+]
 
 async function verifyRequest(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -16,23 +24,17 @@ async function verifyRequest(request: Request) {
     return { error: 'Missing or invalid Authorization header' };
   }
   const idToken = authHeader.split('Bearer ')[1];
+
+  const allowedEmails = merge ? MERGE_EMAILS : ALLOWED_EMAILS;
+
   try {
     const decoded = await adminAuth.verifyIdToken(idToken);
-    if (!decoded.email || !ALLOWED_EMAILS.includes(decoded.email)) {
+    if (!decoded.email || !allowedEmails.includes(decoded.email)) {
       return { error: 'Unauthorized: Email not allowed' };
     }
     return { email: decoded.email };
   } catch (err) {
     return { error: 'Invalid or expired token' };
-  }
-}
-
-async function triggerVercelBuild() {
-  if (!VERCEL_DEPLOY_HOOK_URL) return;
-  try {
-    await fetch(VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
-  } catch (err) {
-    // Optionally log error
   }
 }
 
@@ -72,14 +74,12 @@ export async function PUT(request: Request) {
         batch.update(eventRef, { order: item.order });
       });
       await batch.commit();
-      await triggerVercelBuild(); // Trigger Vercel build after reorder
       return NextResponse.json({ success: true });
     } else {
       const { id, ...data } = body;
       if (!id) return NextResponse.json({ success: false, error: 'Missing event id' }, { status: 400 });
       const eventDoc = adminDb.collection('events').doc(id);
       await eventDoc.update(data);
-      await triggerVercelBuild(); // Trigger Vercel build after update
       return NextResponse.json({ success: true });
     }
   } catch (error) {

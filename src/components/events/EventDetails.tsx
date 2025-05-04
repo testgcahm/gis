@@ -106,7 +106,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
           )}
           {event.register && (
             <div className="flex justify-center mt-4 md:mt-6">
-              <Link href='/register'>
+              <Link href={event.registrationLink || '/register'}>
                 <button className="bg-secondary hover:bg-secondary/90 text-white font-bold px-5 py-2 sm:px-6 sm:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary/50 text-sm sm:text-base md:text-lg">Register for {event.title}</button>
               </Link>
             </div>
