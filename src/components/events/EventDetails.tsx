@@ -13,7 +13,6 @@ interface EventDetailsProps {
 const EventDetails = ({ event }: EventDetailsProps) => {
 
   const [copied, setCopied] = useState(false);
-  console.log(event.image)
 
   const onShare = async () => {
     const url = `${window.location.origin}/events/${event.slug}`;
@@ -99,6 +98,9 @@ const EventDetails = ({ event }: EventDetailsProps) => {
                 {event.subevents.map((sub, idx) => (
                   <div key={idx} className="border-l-4 border-primary-400 pl-4 py-2 bg-primary-50 rounded">
                     <div className="font-bold text-primary-700">{sub.time} - {sub.title}</div>
+                    {sub.imageUrl && (
+                      <img src={sub.imageUrl} alt={sub.title} className="mt-2 max-h-32 max-w-xs rounded shadow border border-primary-100 bg-white" />
+                    )}
                     {sub.description && <div className="text-gray-700 mt-1">{sub.description}</div>}
                     {sub.speakers && sub.speakers.length > 0 && (
                       <div className="mt-2">
