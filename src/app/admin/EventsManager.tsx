@@ -227,7 +227,7 @@ export default function EventsManager() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex flex-col items-center justify-center pb-[200px] mb-4 min-h-[85vh] text-primary p-8 max-[400px]:p-4 max-[352px]:p-2"
+            className="flex flex-col items-center justify-center mb-4 min-h-[85vh] text-primary p-8 max-[400px]:p-4 max-[352px]:p-2"
             style={{ scrollBehavior: 'auto' }}
         >
             <h1 className="text-4xl font-extrabold text-primary-700 mb-8 text-center">Events Admin</h1>

@@ -136,30 +136,16 @@ const EventsPage = () => {
                     allowed ?
                         (
                             <div className="relative" ref={profileRef}>
-                                <div className='flex flex-row mt-2 w-full'>
-                                    {/* Publish centered, Profile at end */}
-                                    <div className="flex items-center w-full p-4 relative">
-                                        <div className="flex-1 flex justify-center">
-                                            <button
-                                                className="bg-green-600 disabled:bg-primary-300 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-2"
-                                                onClick={() => setShowPublishConfirm(true)}
-                                                disabled={loading}
-                                            >
-                                                {loading ? <SimpleSpinner /> : null}
-                                                <span>Publish</span>
-                                            </button>
-                                        </div>
-                                        <div className="absolute right-3">
-                                            <button
-                                                ref={buttonRef}
-                                                className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white focus:outline-none"
-                                                onClick={() => setShowDropdown((v) => !v)}
-                                                title="Profile"
-                                            >
-                                                <User className="w-6 h-6" />
-                                            </button>
-                                        </div>
-                                    </div>
+                                {/* Publish centered, Profile at end */}
+                                <div className="flex justify-end w-full p-4 relative">
+                                    <button
+                                        ref={buttonRef}
+                                        className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white focus:outline-none"
+                                        onClick={() => setShowDropdown((v) => !v)}
+                                        title="Profile"
+                                    >
+                                        <User className="w-6 h-6" />
+                                    </button>
                                 </div>
                                 {showDropdown && (
                                     <div
@@ -178,6 +164,16 @@ const EventsPage = () => {
                                     </div>
                                 )}
                                 <EventsManager />
+                                <div className="flex-1 flex mb-10 justify-center">
+                                    <button
+                                        className="bg-green-600 disabled:bg-primary-300 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-2"
+                                        onClick={() => setShowPublishConfirm(true)}
+                                        disabled={loading}
+                                    >
+                                        {loading ? <SimpleSpinner /> : null}
+                                        <span>Publish</span>
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className='flex flex-col items-center justify-center min-h-[80vh] bg-gray-100'>

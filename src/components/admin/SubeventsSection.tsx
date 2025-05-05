@@ -5,6 +5,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { MoveVertical } from "lucide-react";
 import { SimpleSpinner } from "../Spinner";
+import LibraryModal from './LibraryModal';
 
 interface SubeventWithError {
     time: string;
@@ -29,6 +30,9 @@ interface SubeventsSectionProps {
     handleAddSubeventSpeaker: (subIdx: number) => void;
     handleRemoveSubeventSpeaker: (subIdx: number, sIdx: number) => void;
     onSubeventDragEnd: (event: any) => void; // <-- new prop for handling drag end
+    driveImages: {id: string, name: string, url: string}[];
+    driveLoading: boolean;
+    driveError: string | null;
 }
 
 // New component for the sortable item
@@ -43,6 +47,9 @@ const SortableSubeventItem: React.FC<{
     handleSubeventSpeakerChange: (subIdx: number, sIdx: number, field: "name" | "bio", value: string) => void;
     handleAddSubeventSpeaker: (subIdx: number) => void;
     handleRemoveSubeventSpeaker: (subIdx: number, sIdx: number) => void;
+    driveImages: {id: string, name: string, url: string}[];
+    driveLoading: boolean;
+    driveError: string | null;
 }> = ({
     sub,
     idx,
@@ -53,7 +60,10 @@ const SortableSubeventItem: React.FC<{
     handleRemoveSubevent,
     handleSubeventSpeakerChange,
     handleAddSubeventSpeaker,
-    handleRemoveSubeventSpeaker
+    handleRemoveSubeventSpeaker,
+    driveImages,
+    driveLoading,
+    driveError
 }) => {
     const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: sub.id });
     const style = {
@@ -61,6 +71,10 @@ const SortableSubeventItem: React.FC<{
         transition,
         opacity: isDragging ? 0.5 : 1,
     };
+
+    const [showLibrary, setShowLibrary] = React.useState(false);
+    // Add state for error if image is too large
+    const [libraryError, setLibraryError] = React.useState<string | null>(null);
 
     return (
         <div ref={setNodeRef} style={style} className="border-l-4 border-primary-400 pl-4 p-3 py-2 bg-[#f6f6ff] rounded mb-2 flex flex-col">
@@ -96,9 +110,54 @@ const SortableSubeventItem: React.FC<{
                     style={{ display: 'none' }}
                     onChange={e => handleSubeventImageChange(e, idx)}
                 />
-                <label htmlFor={`subevent-image-${idx}`} className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
-                    {sub.imageUrl && sub.imageUrl !== 'uploading' ? 'Change Image' : 'Click to select image (jpg, jpeg, png)'}
-                </label>
+                <div className="flex gap-2">
+                    <label htmlFor={`subevent-image-${idx}`} className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
+                        {sub.imageUrl && sub.imageUrl !== 'uploading' ? 'Change Image' : 'Click to select image (jpg, jpeg, png)'}
+                    </label>
+                    <button type="button" className="px-3 py-2 bg-primary-100 text-primary-700 rounded-lg border border-primary-200 hover:bg-primary-200 transition" onClick={() => setShowLibrary(true)}>
+                        Library
+                    </button>
+                </div>
+                {sub.imageUrl && sub.imageUrl !== 'uploading' && (
+                    <img src={sub.imageUrl} alt="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
+                )}
+                <LibraryModal
+                    open={showLibrary}
+                    images={driveImages}
+                    loading={driveLoading}
+                    error={driveError || libraryError}
+                    onSelect={async url => {
+                        setLibraryError(null);
+                        try {
+                            // Use our server-side proxy to check image size instead of direct fetch
+                            const res = await fetch('/api/check-image-size', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ url })
+                            });
+                            
+                            const data = await res.json();
+                            
+                            if (!data.success) {
+                                setLibraryError('Failed to check image size.');
+                                return;
+                            }
+                            
+                            if (data.isOverLimit) {
+                                setLibraryError(`Selected image is ${data.sizeKB}KB (larger than 250KB). Please choose a smaller image.`);
+                                return;
+                            }
+                            
+                            handleSubeventImageChange({ target: { files: [ { name: '', type: '', size: 0, url } ] } } as any, idx);
+                            setShowLibrary(false);
+                        } catch (error) {
+                            setLibraryError('Failed to check image size.');
+                        }
+                    }}
+                    onClose={() => { setShowLibrary(false); setLibraryError(null); }}
+                />
                 <p className="text-xs text-gray-600 mt-1">
                     Max size: 250KB. Supported formats: jpg, jpeg, png
                 </p>
@@ -111,9 +170,6 @@ const SortableSubeventItem: React.FC<{
                     </p>
                 )}
                 {subeventUploading && <div className="p-1"><SimpleSpinner className='w-5 h-5' /></div>}
-                {sub.imageUrl && sub.imageUrl !== 'uploading' && (
-                    <img src={sub.imageUrl} alt="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
-                )}
             </div>
             <textarea
                 value={sub.description || ""}
@@ -145,7 +201,10 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
     handleSubeventSpeakerChange,
     handleAddSubeventSpeaker,
     handleRemoveSubeventSpeaker,
-    onSubeventDragEnd
+    onSubeventDragEnd,
+    driveImages,
+    driveLoading,
+    driveError
 }) => {
     // Give each subevent a unique id for dnd-kit
     const items = subevents.map(sub => sub.id);
@@ -158,7 +217,7 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                     <div className="space-y-2">
                         {subevents.map((sub, idx) => (
                             <SortableSubeventItem
-                                key={sub.id} // Use stable ID for key
+                                key={sub.id}
                                 sub={sub}
                                 idx={idx}
                                 subeventUploading={subeventUploading[idx]}
@@ -169,6 +228,9 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                                 handleSubeventSpeakerChange={handleSubeventSpeakerChange}
                                 handleAddSubeventSpeaker={handleAddSubeventSpeaker}
                                 handleRemoveSubeventSpeaker={handleRemoveSubeventSpeaker}
+                                driveImages={driveImages}
+                                driveLoading={driveLoading}
+                                driveError={driveError}
                             />
                         ))}
                         <button type="button" onClick={handleAddSubevent} className="bg-secondary text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-secondary-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 mt-2">Add Segment</button>

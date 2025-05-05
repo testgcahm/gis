@@ -78,6 +78,47 @@ export default function EventForm({
     const [mainImageUploading, setMainImageUploading] = useState(false);
     const [mainImageError, setMainImageError] = useState("");
 
+    // New: Google Drive images state
+    const [driveImages, setDriveImages] = useState<{id: string, name: string, url: string}[]>([]);
+    const [driveLoading, setDriveLoading] = useState(false);
+    const [driveError, setDriveError] = useState<string | null>(null);
+    // New: Handler for selecting image from library (stub)
+    const handleSelectMainImageFromLibrary = async (url: string) => {
+        setMainImageError("");
+        try {
+            // Use our server-side proxy to check image size instead of direct fetch
+            const res = await fetch('/api/check-image-size', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url })
+            });
+            
+            const data = await res.json();
+            
+            if (!data.success) {
+                setMainImageError('Failed to check image size.');
+                return;
+            }
+            
+            if (data.isOverLimit) {
+                setMainImageError(`Selected image is ${data.sizeKB}KB (larger than 250KB). Please choose a smaller image.`);
+                return;
+            }
+            
+            handleChange({ target: { name: 'image', value: url } } as any);
+            setShowImageModal(false);
+        } catch (error) {
+            setMainImageError('Failed to check image size.');
+        }
+    };
+    const handleSelectSubeventImageFromLibrary = (idx: number, url: string) => {
+        const updated = [...normalizedSubevents];
+        updated[idx] = { ...updated[idx], imageUrl: url, imageError: '' };
+        handleChange({ target: { name: 'subevents', value: updated } } as any);
+    };
+
     // Sync state arrays if subevents length changes
     useEffect(() => {
         setSubeventUploading(arr => arr.length === normalizedSubevents.length ? arr : Array(normalizedSubevents.length).fill(false));
@@ -123,6 +164,12 @@ export default function EventForm({
             if (data.success && data.url) {
                 updated[idx] = { ...updated[idx], imageUrl: data.url, imageError: '' };
                 setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = ''; return arr; });
+                // Refresh drive images after upload
+                fetch('/api/drive-images')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) setDriveImages(data.images);
+                    });
             } else {
                 updated[idx] = { ...updated[idx], imageUrl: '', imageError: 'Image upload failed: ' + (data.error || 'Unknown error') };
                 setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = 'Image upload failed: ' + (data.error || 'Unknown error'); return arr; });
@@ -222,6 +269,12 @@ export default function EventForm({
             if (data.success && data.url) {
                 handleChange({ target: { name: 'image', value: data.url } } as any);
                 setMainImageError("");
+                // Refresh drive images after upload
+                fetch('/api/drive-images')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) setDriveImages(data.images);
+                    });
             } else {
                 setMainImageError('Image upload failed: ' + (data.error || 'Unknown error'));
                 handleChange({ target: { name: 'image', value: '' } } as any);
@@ -263,6 +316,26 @@ export default function EventForm({
         }
     }, [form.title]);
 
+    // Modal state for image selection
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [imageTab, setImageTab] = useState<'upload'|'library'>('upload');
+    // Subevent image modal state
+    const [showSubeventImageModalIdx, setShowSubeventImageModalIdx] = useState<number|null>(null);
+    const [subeventImageTab, setSubeventImageTab] = useState<'upload'|'library'>('upload');
+
+    // Preload Google Drive images in the background when the component mounts
+    useEffect(() => {
+        setDriveLoading(true);
+        fetch('/api/drive-images')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) setDriveImages(data.images);
+                else setDriveError(data.error || 'Failed to load images');
+            })
+            .catch(() => setDriveError('Failed to load images'))
+            .finally(() => setDriveLoading(false));
+    }, []);
+
     return (
         <form onSubmit={handleSubmit} className="bg-white border-l-4 border-secondary rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.15)] p-8 mb-10 w-full max-w-2xl space-y-5 transition-all duration-700">
             <h2 className="text-2xl font-extrabold text-primary mb-4 drop-shadow-sm">{editing ? "Edit Event" : "Add Event"}</h2>
@@ -303,18 +376,16 @@ export default function EventForm({
 
             </div>
             <div>
-                <label htmlFor="image-upload" className="block text-primary font-semibold mb-1">Event Image <span className='text-red-500'>*</span></label>
-                <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg"
-                    style={{ display: 'none' }}
-                    onChange={handleMainImageChange}
-                    disabled={mainImageUploading}
-                />
-                <label htmlFor="image-upload" className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
-                    {form.image && form.image !== 'uploading' ? 'Change Image' : 'Click to select image (jpg, jpeg, png)'}
-                </label>
+                <label className="block text-primary font-semibold mb-1">Event Image <span className='text-red-500'>*</span></label>
+                <div className="w-full flex items-center justify-start px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500"
+                    onClick={() => setShowImageModal(true)}
+                    title="Click to change image"
+                >
+                    <span>{form.image && form.image !== 'uploading' ? 'Change Image' : 'Click to select image (jpg, jpeg, png)'}</span>
+                </div>
+                {form.image && form.image !== 'uploading' && (
+                    <img src={form.image} title="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
+                )}
                 <p className="text-xs text-gray-600 mt-1">
                     Max size: 250KB. Supported formats: jpg, jpeg, png
                 </p>
@@ -325,10 +396,110 @@ export default function EventForm({
                     <p className="text-red-500 text-sm mt-1 animate-[pulse_0.5s_ease-in-out]">{mainImageError}</p>
                 )}
                 {mainImageUploading && <div className="p-1"><SimpleSpinner className='w-5 h-5' /></div>}
-                {form.image && form.image !== 'uploading' && (
-                    <img src={form.image} title="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
-                )}
             </div>
+
+            {/* Modal for image selection */}
+            {showImageModal && (
+                <div className="fixed inset-0 z-50 flex items-center h-screen justify-center bg-black/40">
+                    <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
+                        <button className="absolute top-2 right-2 text-xl" onClick={()=>setShowImageModal(false)}>&times;</button>
+                        <div className="flex gap-2 mb-4">
+                            <button type="button" className={`px-3 py-1 rounded ${imageTab==='upload'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setImageTab('upload')}>Upload from PC</button>
+                            <button type="button" className={`px-3 py-1 rounded ${imageTab==='library'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setImageTab('library')}>Select from Library</button>
+                        </div>
+                        {imageTab==='upload' && (
+                            <>
+                                <input
+                                    id="image-upload-modal"
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    style={{ display: 'none' }}
+                                    onChange={async (e) => {
+                                        await handleMainImageChange(e);
+                                        setShowImageModal(false);
+                                    }}
+                                    disabled={mainImageUploading}
+                                />
+                                <label htmlFor="image-upload-modal" className="w-full flex items-center justify-center px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
+                                    {mainImageUploading ? <SimpleSpinner className='w-5 h-5' /> : 'Click to select image (jpg, jpeg, png)'}
+                                </label>
+                            </>
+                        )}
+                        {imageTab==='library' && (
+                            <div>
+                                <div className="font-bold text-lg mb-2 text-primary-700 text-center">Select an image from your library</div>
+                                {driveLoading && <div className="text-center py-6"><SimpleSpinner /></div>}
+                                {driveError && <div className="text-red-500 text-center py-4">{driveError}</div>}
+                                {!driveLoading && !driveError && driveImages.length === 0 && (
+                                    <div className="text-gray-500 text-center py-8">No images found in your Google Drive folder.</div>
+                                )}
+                                <div className="grid grid-cols-3 max-[510px]:grid-cols-2 gap-3 max-h-72 overflow-x-hidden overflow-y-auto p-1">
+                                    {driveImages.map(img => (
+                                        <button
+                                            key={img.id}
+                                            type="button"
+                                            className="relative group focus:outline-none"
+                                            title={img.name}
+                                            onClick={() => handleSelectMainImageFromLibrary(img.url)}
+                                        >
+                                            <img
+                                                src={img.url}
+                                                alt={img.name}
+                                                className="rounded border-2 border-transparent group-hover:border-primary-500 group-focus:border-primary-600 transition-all shadow-sm w-full h-24 object-cover bg-white"
+                                            />
+                                            <span className="absolute bottom-1 left-1 right-1 bg-black/60 text-white text-xs rounded px-1 py-0.5 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition">{img.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+            {/* Subevent image modal */}
+            {showSubeventImageModalIdx !== null && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
+                        <button className="absolute top-2 right-2 text-xl" onClick={()=>setShowSubeventImageModalIdx(null)}>&times;</button>
+                        <div className="flex gap-2 mb-4">
+                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab==='upload'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setSubeventImageTab('upload')}>Upload from PC</button>
+                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab==='library'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setSubeventImageTab('library')}>Select from Library</button>
+                        </div>
+                        {subeventImageTab==='upload' && (
+                            <>
+                                <input
+                                    id="subevent-image-upload-modal"
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    style={{ display: 'none' }}
+                                    onChange={async (e) => {
+                                        await handleSubeventImageChange(e, showSubeventImageModalIdx);
+                                        setShowSubeventImageModalIdx(null);
+                                    }}
+                                    disabled={subeventUploading[showSubeventImageModalIdx]}
+                                />
+                                <label htmlFor="subevent-image-upload-modal" className="w-full flex items-center justify-center px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
+                                    {subeventUploading[showSubeventImageModalIdx] ? <SimpleSpinner className='w-5 h-5' /> : 'Click to select image (jpg, jpeg, png)'}
+                                </label>
+                            </>
+                        )}
+                        {subeventImageTab==='library' && (
+                            <>
+                                {driveLoading && <div><SimpleSpinner /></div>}
+                                {driveError && <div className="text-red-500">{driveError}</div>}
+                                <div className="grid grid-cols-3 gap-2">
+                                    {driveImages.map(img => (
+                                        <img key={img.id} src={img.url} alt={img.name} className="rounded border cursor-pointer hover:scale-105 transition" onClick={()=>{
+                                            handleSelectSubeventImageFromLibrary(showSubeventImageModalIdx, img.url);
+                                            setShowSubeventImageModalIdx(null);
+                                        }} />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
             <div>
                 <div className="flex items-center mt-2">
                     <input
@@ -381,7 +552,10 @@ export default function EventForm({
                 subevents={normalizedSubevents}
                 subeventUploading={subeventUploading}
                 subeventImageErrors={subeventImageErrors}
-                handleSubeventImageChange={handleSubeventImageChange}
+                handleSubeventImageChange={(e, idx) => {
+                    // Open modal instead of direct upload
+                    setShowSubeventImageModalIdx(idx);
+                }}
                 handleSubeventChange={handleSubeventChange}
                 handleAddSubevent={handleAddSubevent}
                 handleRemoveSubevent={handleRemoveSubevent}
@@ -389,6 +563,9 @@ export default function EventForm({
                 handleAddSubeventSpeaker={handleAddSubeventSpeaker}
                 handleRemoveSubeventSpeaker={handleRemoveSubeventSpeaker}
                 onSubeventDragEnd={handleSubeventDragEnd}
+                driveImages={driveImages}
+                driveLoading={driveLoading}
+                driveError={driveError}
             />
             <div className="flex gap-4 mt-2">
                 <button type="submit" className="w-full bg-primary cursor-pointer font-semibold text-white p-3 rounded-lg hover:bg-secondary hover:text-primary-900 hover:scale-[1.02] transition-all duration-300 shadow-md flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>{editing ? "Update" : "Add"} Event</button>
