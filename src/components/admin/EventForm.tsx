@@ -78,45 +78,22 @@ export default function EventForm({
     const [mainImageUploading, setMainImageUploading] = useState(false);
     const [mainImageError, setMainImageError] = useState("");
 
-    // New: Google Drive images state
-    const [driveImages, setDriveImages] = useState<{id: string, name: string, url: string}[]>([]);
+    // New: Google Drive images state, updated with size information
+    const [driveImages, setDriveImages] = useState<{id: string, name: string, url: string, sizeKB?: number, isOverSizeLimit?: boolean}[]>([]);
     const [driveLoading, setDriveLoading] = useState(false);
     const [driveError, setDriveError] = useState<string | null>(null);
-    // New: Handler for selecting image from library (stub)
-    const handleSelectMainImageFromLibrary = async (url: string) => {
-        setMainImageError("");
-        try {
-            // Use our server-side proxy to check image size instead of direct fetch
-            const res = await fetch('/api/check-image-size', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ url })
-            });
-            
-            const data = await res.json();
-            
-            if (!data.success) {
-                setMainImageError('Failed to check image size.');
-                return;
-            }
-            
-            if (data.isOverLimit) {
-                setMainImageError(`Selected image is ${data.sizeKB}KB (larger than 250KB). Please choose a smaller image.`);
-                return;
-            }
-            
-            handleChange({ target: { name: 'image', value: url } } as any);
-            setShowImageModal(false);
-        } catch (error) {
-            setMainImageError('Failed to check image size.');
-        }
+
+    // New: Handler for selecting image from library (simplified)
+    const handleSelectMainImageFromLibrary = (url: string) => {
+        handleChange({ target: { name: 'image', value: url } } as any);
+        setShowImageModal(false);
     };
+
     const handleSelectSubeventImageFromLibrary = (idx: number, url: string) => {
         const updated = [...normalizedSubevents];
         updated[idx] = { ...updated[idx], imageUrl: url, imageError: '' };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
+        setShowSubeventImageModalIdx(null);
     };
 
     // Sync state arrays if subevents length changes
@@ -433,21 +410,39 @@ export default function EventForm({
                                 {!driveLoading && !driveError && driveImages.length === 0 && (
                                     <div className="text-gray-500 text-center py-8">No images found in your Google Drive folder.</div>
                                 )}
-                                <div className="grid grid-cols-3 max-[510px]:grid-cols-2 gap-3 max-h-72 overflow-x-hidden overflow-y-auto p-1">
+                                <div className="grid grid-cols-3 max-[510px]:grid-cols-1 gap-3 max-h-72 overflow-y-auto p-1">
                                     {driveImages.map(img => (
                                         <button
                                             key={img.id}
                                             type="button"
                                             className="relative group focus:outline-none"
-                                            title={img.name}
-                                            onClick={() => handleSelectMainImageFromLibrary(img.url)}
+                                            title={img.isOverSizeLimit 
+                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)` 
+                                                : `${img.name} (${img.sizeKB}KB)`}
+                                            onClick={() => !img.isOverSizeLimit && handleSelectMainImageFromLibrary(img.url)}
+                                            disabled={img.isOverSizeLimit}
                                         >
-                                            <img
-                                                src={img.url}
-                                                alt={img.name}
-                                                className="rounded border-2 border-transparent group-hover:border-primary-500 group-focus:border-primary-600 transition-all shadow-sm w-full h-24 object-cover bg-white"
-                                            />
-                                            <span className="absolute bottom-1 left-1 right-1 bg-black/60 text-white text-xs rounded px-1 py-0.5 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition">{img.name}</span>
+                                            <div className="relative">
+                                                <img
+                                                    src={img.url}
+                                                    alt={img.name}
+                                                    className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
+                                                        ${img.isOverSizeLimit 
+                                                        ? 'border-red-500 opacity-70' 
+                                                        : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
+                                                />
+                                                {img.isOverSizeLimit && (
+                                                    <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
+                                                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">
+                                                            {img.sizeKB}KB (Too large)
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <span className={`absolute bottom-1 left-1 right-1 bg-black/60 text-white text-xs rounded px-1 py-0.5 
+                                                    ${img.isOverSizeLimit ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus:opacity-100'} transition`}>
+                                                    {img.name} {img.sizeKB && `(${img.sizeKB}KB)`}
+                                                </span>
+                                            </div>
                                         </button>
                                     ))}
                                 </div>
@@ -484,18 +479,50 @@ export default function EventForm({
                             </>
                         )}
                         {subeventImageTab==='library' && (
-                            <>
-                                {driveLoading && <div><SimpleSpinner /></div>}
-                                {driveError && <div className="text-red-500">{driveError}</div>}
-                                <div className="grid grid-cols-3 gap-2">
+                            <div>
+                                <div className="font-bold text-lg mb-2 text-primary-700 text-center">Select an image from your library</div>
+                                {driveLoading && <div className="text-center py-6"><SimpleSpinner /></div>}
+                                {driveError && <div className="text-red-500 text-center py-4">{driveError}</div>}
+                                {!driveLoading && !driveError && driveImages.length === 0 && (
+                                    <div className="text-gray-500 text-center py-8">No images found in your Google Drive folder.</div>
+                                )}
+                                <div className="grid grid-cols-3 max-[510px]:grid-cols-1 gap-3 max-h-72 overflow-y-auto p-1">
                                     {driveImages.map(img => (
-                                        <img key={img.id} src={img.url} alt={img.name} className="rounded border cursor-pointer hover:scale-105 transition" onClick={()=>{
-                                            handleSelectSubeventImageFromLibrary(showSubeventImageModalIdx, img.url);
-                                            setShowSubeventImageModalIdx(null);
-                                        }} />
+                                        <button
+                                            key={img.id}
+                                            type="button"
+                                            className="relative group focus:outline-none"
+                                            title={img.isOverSizeLimit 
+                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)` 
+                                                : `${img.name} (${img.sizeKB}KB)`}
+                                            onClick={() => !img.isOverSizeLimit && handleSelectSubeventImageFromLibrary(showSubeventImageModalIdx, img.url)}
+                                            disabled={img.isOverSizeLimit}
+                                        >
+                                            <div className="relative">
+                                                <img
+                                                    src={img.url}
+                                                    alt={img.name}
+                                                    className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
+                                                        ${img.isOverSizeLimit 
+                                                        ? 'border-red-500 opacity-70' 
+                                                        : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
+                                                />
+                                                {img.isOverSizeLimit && (
+                                                    <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
+                                                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">
+                                                            {img.sizeKB}KB (Too large)
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <span className={`absolute bottom-1 left-1 right-1 bg-black/60 text-white text-xs rounded px-1 py-0.5 
+                                                    ${img.isOverSizeLimit ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus:opacity-100'} transition`}>
+                                                    {img.name} {img.sizeKB && `(${img.sizeKB}KB)`}
+                                                </span>
+                                            </div>
+                                        </button>
                                     ))}
                                 </div>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

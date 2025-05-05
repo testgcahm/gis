@@ -126,37 +126,16 @@ const SortableSubeventItem: React.FC<{
                     images={driveImages}
                     loading={driveLoading}
                     error={driveError || libraryError}
-                    onSelect={async url => {
-                        setLibraryError(null);
-                        try {
-                            // Use our server-side proxy to check image size instead of direct fetch
-                            const res = await fetch('/api/check-image-size', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ url })
-                            });
-                            
-                            const data = await res.json();
-                            
-                            if (!data.success) {
-                                setLibraryError('Failed to check image size.');
-                                return;
-                            }
-                            
-                            if (data.isOverLimit) {
-                                setLibraryError(`Selected image is ${data.sizeKB}KB (larger than 250KB). Please choose a smaller image.`);
-                                return;
-                            }
-                            
-                            handleSubeventImageChange({ target: { files: [ { name: '', type: '', size: 0, url } ] } } as any, idx);
-                            setShowLibrary(false);
-                        } catch (error) {
-                            setLibraryError('Failed to check image size.');
-                        }
+                    onSelect={(url) => {
+                        // The LibraryModal already prevents selection of oversized images via the disabled prop
+                        // so we can simply proceed with selection here
+                        handleSubeventImageChange({ target: { files: [{ name: '', type: '', size: 0, url }] } } as any, idx);
+                        setShowLibrary(false);
                     }}
-                    onClose={() => { setShowLibrary(false); setLibraryError(null); }}
+                    onClose={() => { 
+                        setShowLibrary(false); 
+                        setLibraryError(null); 
+                    }}
                 />
                 <p className="text-xs text-gray-600 mt-1">
                     Max size: 250KB. Supported formats: jpg, jpeg, png

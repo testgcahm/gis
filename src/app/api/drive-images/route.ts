@@ -22,15 +22,28 @@ export async function GET() {
     }
     const res = await drive.files.list({
       q: `'${folderId}' in parents and mimeType contains 'image/' and trashed = false`,
-      fields: 'files(id, name, mimeType)',
+      // Include size field to get file sizes
+      fields: 'files(id, name, mimeType, size)',
       pageSize: 50,
     });
+    
     const files = res.data.files || [];
-    const images = files.map(file => ({
-      id: file.id,
-      name: file.name,
-      url: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`
-    }));
+    
+    // Process files with size information
+    const images = files.map(file => {
+      // Convert size to KB (Google returns size in bytes)
+      const sizeInKB = file.size ? Math.round(parseInt(file.size as string) / 1024) : 0;
+      const isOverSizeLimit = sizeInKB > 250;
+      
+      return {
+        id: file.id,
+        name: file.name,
+        url: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
+        sizeKB: sizeInKB,
+        isOverSizeLimit
+      };
+    });
+    
     return NextResponse.json({ success: true, images });
   } catch (error) {
     console.error('Error in /api/drive-images:', error);
