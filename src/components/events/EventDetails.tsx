@@ -6,6 +6,10 @@ import { useState } from 'react';
 import { EventData } from './types';
 import Link from 'next/link';
 import DOMPurify from 'dompurify';
+const sanitize = (input: string) =>
+  (typeof DOMPurify.sanitize === 'function'
+    ? DOMPurify.sanitize(input)
+    : (DOMPurify as any).default.sanitize(input));
 
 interface EventDetailsProps {
   event: EventData;
@@ -133,7 +137,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
                         {sub.description && (
                           <div
                             className="text-gray-700 mb-2 text-sm md:text-base"
-                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sub.description.replace(/\n/g, '<br />')) }}
+                            dangerouslySetInnerHTML={{ __html: sanitize(sub.description.replace(/\n/g, '<br />')) }}
                           />
                         )}
                         {sub.speakers && sub.speakers.length > 0 && (
