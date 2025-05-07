@@ -37,7 +37,7 @@ export default function NotificationPopup() {
           </button>
         </div>
       )}
-      <div className="fixed inset-0 z-50 flex items-start justify-center min-h-screen bg-black/50 bg-opacity-60 overflow-auto">
+      <div className="fixed inset-0 z-[70] flex items-start justify-center min-h-screen bg-black/50 bg-opacity-60 overflow-auto">
         <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-8 border border-gray-200 flex flex-col items-center my-8">
           <button
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl"
@@ -69,7 +69,7 @@ export default function NotificationPopup() {
               Allah ki traf se jo hota h behtar hota h & یقیناً is mein koi na koi behtari hi ho gi.
             </p>
             <p className="text-center text-sm mb-2">اللہ ھمارا حامی وناصر ہو <br/>Ameen.<br/>Jazakallah khair .</p>
-            <Link href="/events/islamic-fiesta" className="mt-3 inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition">More details</Link>
+            <Link href="/events/islamic-fiesta" className="mt-3 inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition">See Event</Link>
             <button
               className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-700 font-semibold rounded text-white transition"
               onClick={() => {
