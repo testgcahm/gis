@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase-admin';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { revalidatePath } from 'next/cache';
 
 const merge = false;
 
@@ -38,20 +39,34 @@ async function verifyRequest(request: Request) {
     }
 }
 
-async function triggerVercelBuild() {
-    if (!VERCEL_DEPLOY_HOOK_URL || process.env.BASE_URL === 'http://localhost:3000/') return;
-    try {
-        await fetch(VERCEL_DEPLOY_HOOK_URL, { method: 'POST' });
-    } catch (err) {
-        // Optionally log error
-    }
-}
-
 export async function GET(request: Request) {
     const auth = await verifyRequest(request);
     if (auth.error) {
         return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
     }
-    await triggerVercelBuild();
-    return NextResponse.json({ success: true, message: 'Publish Successful, Wait for 2 minutes before seeing changes' });
+    
+    try {
+        // Revalidate the main events page
+        revalidatePath('/events');
+        
+        // Get all events from Firestore to revalidate individual event pages
+        const eventsSnapshot = await adminDb.collection('events').get();
+        const eventSlugs = eventsSnapshot.docs.map(doc => doc.data().slug).filter(Boolean);
+        
+        // Revalidate each individual event page
+        for (const slug of eventSlugs) {
+            revalidatePath(`/events/${slug}`);
+        }
+        
+        return NextResponse.json({ 
+            success: true, 
+            message: `Publish Successful. Revalidated /events and ${eventSlugs.length} individual event pages.` 
+        });
+    } catch (error) {
+        console.error('Error during revalidation:', error);
+        return NextResponse.json({ 
+            success: false, 
+            error: 'Failed to revalidate pages' 
+        }, { status: 500 });
+    }
 }

@@ -136,7 +136,6 @@ const EventsPage = () => {
                     allowed ?
                         (
                             <div className="relative" ref={profileRef}>
-                                {/* Publish centered, Profile at end */}
                                 <div className="flex justify-end w-full p-4 relative">
                                     <button
                                         ref={buttonRef}
