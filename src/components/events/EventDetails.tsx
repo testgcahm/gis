@@ -2,14 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { LocationIcon } from '../footer/FooterIcons';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { EventData } from './types';
 import Link from 'next/link';
-import DOMPurify from 'dompurify';
-const sanitize = (input: string) =>
-  (typeof DOMPurify.sanitize === 'function'
-    ? DOMPurify.sanitize(input)
-    : (DOMPurify as any).default.sanitize(input));
 
 interface EventDetailsProps {
   event: EventData;
@@ -18,6 +13,22 @@ interface EventDetailsProps {
 const EventDetails = ({ event }: EventDetailsProps) => {
   const [copied, setCopied] = useState(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const domPurifyRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('dompurify').then((mod) => {
+        domPurifyRef.current = mod.default || mod;
+      });
+    }
+  }, []);
+
+  const sanitize = (input: string) => {
+    if (domPurifyRef.current && typeof domPurifyRef.current.sanitize === 'function') {
+      return domPurifyRef.current.sanitize(input);
+    }
+    return input;
+  };
 
   const onShare = async () => {
     const url = `${window.location.origin}/events/${event.slug}`;
@@ -104,14 +115,14 @@ const EventDetails = ({ event }: EventDetailsProps) => {
                   Venue:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.venue}</span></li>
                 <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* List/Activities */}
                   <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="5" cy="7" r="2" /><circle cx="5" cy="12" r="2" /><circle cx="5" cy="17" r="2" /><line x1="9" y1="7" x2="20" y2="7" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="17" x2="20" y2="17" /></svg>
-                  Activities:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1" dangerouslySetInnerHTML={{ __html: event.activities.replace(/\n/g, '<br />') }} /></li>
+                  Activities:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1" dangerouslySetInnerHTML={{ __html: sanitize(event.activities.replace(/\n/g, '<br />')) }} /></li>
                 <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Users/Audience */}
                   <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                   Audience:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.audience}</span></li>
               </ul>
               <div className="bg-[#ededffc5] border border-primary-200 rounded-lg p-4 mt-3 md:mt-4 text-gray-800 text-base sm:text-lg leading-relaxed shadow-sm">
                 <span className="block font-medium text-primary-700 mb-2 border-b border-primary-200 pb-2">Description:</span>
-                <span dangerouslySetInnerHTML={{ __html: event.description.replace(/\n/g, '<br />') }} />
+                <span dangerouslySetInnerHTML={{ __html: sanitize(event.description.replace(/\n/g, '<br />')) }} />
               </div>
             </section>
             {/* Subevents Section */}
@@ -119,7 +130,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
               <section>
                 <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-primary-800 border-b border-primary-200 pb-2">Event Segments</h3>
                 <div className="space-y-6 mt-4">
-                  {event.subevents.map((sub, idx) => (
+                  {event.subevents?.map((sub, idx) => (
                     <div key={idx} className="flex flex-col md:flex-row md:items-center gap-4 border-l-4 border-primary-400 pl-4 py-4 bg-primary-50 rounded-lg shadow-sm">
                       {sub.imageUrl && (
                         <div className="flex-shrink-0 flex justify-center items-center w-full md:w-48">
@@ -144,7 +155,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
                           <div className="mt-2">
                             <span className="font-semibold text-secondary">Speakers:</span>
                             <ul className="list-disc ml-5">
-                              {sub.speakers.map((sp, i) => (
+                              {sub.speakers?.map((sp, i) => (
                                 <li key={i}><span className="font-medium">{sp.name}</span>{sp.bio && ` — ${sp.bio}`}</li>
                               ))}
                             </ul>
@@ -161,7 +172,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
               <section>
                 <h3 className="font-semibold text-lg sm:text-xl md:text-2xl mb-3 md:mb-4 text-secondary-800 border-b border-primary-200 pb-2">Speakers</h3>
                 <div className="space-y-4 md:space-y-5 mt-4">
-                  {event.speakers.map((speaker: any, idx: number) => (
+                  {event.speakers.map((speaker: { name: string; bio?: string }, idx: number) => (
                     <div key={idx}>
                       <span className="font-semibold text-base sm:text-lg text-secondary">{speaker.name}</span>
                       <p className="text-gray-700 text-sm sm:text-base mt-1">{speaker.bio}</p>
