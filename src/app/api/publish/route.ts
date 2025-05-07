@@ -17,8 +17,6 @@ const MERGE_EMAILS = [
     'aqsa59759@gmail.com'
 ]
 
-const VERCEL_DEPLOY_HOOK_URL = process.env.VERCEL_DEPLOY_HOOK_URL + '?buildCache=false';
-
 async function verifyRequest(request: Request) {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -46,6 +44,7 @@ export async function GET(request: Request) {
     }
     
     try {
+        
         // Revalidate the main events page
         revalidatePath('/events');
         
@@ -60,7 +59,7 @@ export async function GET(request: Request) {
         
         return NextResponse.json({ 
             success: true, 
-            message: `Publish Successful. Revalidated /events and ${eventSlugs.length} individual event pages.` 
+            message: `Publish Successful` 
         });
     } catch (error) {
         console.error('Error during revalidation:', error);
