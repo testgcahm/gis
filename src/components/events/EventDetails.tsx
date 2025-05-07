@@ -5,6 +5,7 @@ import { LocationIcon } from '../footer/FooterIcons';
 import { useState } from 'react';
 import { EventData } from './types';
 import Link from 'next/link';
+import DOMPurify from 'dompurify';
 
 interface EventDetailsProps {
   event: EventData;
@@ -99,7 +100,7 @@ const EventDetails = ({ event }: EventDetailsProps) => {
                   Venue:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.venue}</span></li>
                 <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* List/Activities */}
                   <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="5" cy="7" r="2" /><circle cx="5" cy="12" r="2" /><circle cx="5" cy="17" r="2" /><line x1="9" y1="7" x2="20" y2="7" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="17" x2="20" y2="17" /></svg>
-                  Activities:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1" dangerouslySetInnerHTML={{ __html: event.activities }} /></li>
+                  Activities:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1" dangerouslySetInnerHTML={{ __html: event.activities.replace(/\n/g, '<br />') }} /></li>
                 <li className="flex flex-row max-[450px]:flex-col min-[450px]:items-center"><span className="flex-shrink-0 text-primary-500 font-semibold w-32 max-sm:w-28 flex items-center gap-1">{/* Users/Audience */}
                   <svg className="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                   Audience:</span> <span className="max-[450px]:ml-5 text-blue-950 font-medium flex-1">{event.audience}</span></li>
@@ -129,7 +130,12 @@ const EventDetails = ({ event }: EventDetailsProps) => {
                       )}
                       <div className="flex-1 flex flex-col justify-center">
                         <div className="font-bold text-primary-700 text-base md:text-lg mb-1">{sub.time} - {sub.title}</div>
-                        {sub.description && <div className="text-gray-700 mb-2 text-sm md:text-base">{sub.description}</div>}
+                        {sub.description && (
+                          <div
+                            className="text-gray-700 mb-2 text-sm md:text-base"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sub.description.replace(/\n/g, '<br />')) }}
+                          />
+                        )}
                         {sub.speakers && sub.speakers.length > 0 && (
                           <div className="mt-2">
                             <span className="font-semibold text-secondary">Speakers:</span>
