@@ -37,7 +37,7 @@ export default function NotificationPopup() {
           </button>
         </div>
       )}
-      <div className="fixed inset-0 z-[70] flex items-start justify-center min-h-screen bg-black/50 bg-opacity-60 overflow-auto">
+      <div className="fixed inset-0 z-[70] mb-5 flex items-start justify-center min-h-screen bg-black/50 bg-opacity-60 overflow-auto">
         <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-8 border border-gray-200 flex flex-col items-center my-8">
           <button
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl"
@@ -59,28 +59,33 @@ export default function NotificationPopup() {
             <h2 className="text-lg font-bold text-center mb-2 text-primary">Assalamualaikum!!</h2>
             <p className="text-center text-base mb-2 font-arabic">لا تقنطو من رحمت اللہ</p>
             <p className="text-center text-sm mb-2">{`فَاِنَّ مَعَ الْعُسْرِ یُسْرًا: تو بیشک مشکل کے ساتھ آسانی ہے`}</p>
-            <p className="text-justify text-sm mb-2">
-              🔘Last night our all preparations were completed & we were very happy k ..we ان شاءاللہ are going to Host this Mega Event tomorrow in GMCTH Auditorium.But then all of sudden ...kya se kya ho gae situation pta hi nae chla.
-            </p>
-            <p className="text-justify text-sm mb-2">
-              Although still we/the executive cabinet of GMC Islamic society are very Clueless about Future of Our event BUT we will strive our best to figure it out as soon as COUNTRY'S situation GETS NORMALIZED & will make sure k GMC Islamic society ne Islamic Fiesta'25 k liye jo hardwork kiya h since about 2months....wo zaaya na ho.
-            </p>
-            <p className="text-justify text-sm mb-2">
-              Allah ki traf se jo hota h behtar hota h & یقیناً is mein koi na koi behtari hi ho gi.
-            </p>
-            <p className="text-center text-sm mb-2">اللہ ھمارا حامی وناصر ہو <br/>Ameen.<br/>Jazakallah khair .</p>
-            <Link href="/events/islamic-fiesta" className="mt-3 inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition">See Event</Link>
-            <button
-              className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-700 font-semibold rounded text-white transition"
-              onClick={() => {
-                setShow(false);
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('hideEventNotification', '1');
-                }
-              }}
+            Last night, all our preparations were completed and we were very happy, thinking In Sha Allah, we are going to host this mega event tomorrow in the GMCTH Auditorium. But then, all of a sudden... everything changed, and we couldn’t even understand how the situation turned out this way.
+            <br />
+            Although we — the executive cabinet of the GMC Islamic Society — are still quite clueless about the future of our event, we will strive our best to figure things out as soon as the country's situation stabilizes, and we’ll make sure that the hard work the GMC Islamic Society has put into Islamic Fiesta '25 for the past two months does not go to waste.
+            <br />
+            Whatever happens from Allah is always for the best, and surely, there must be some hidden goodness in this too.
+            <p className="text-center text-sm mb-2">اللہ ھمارا حامی وناصر ہو <br />Ameen.<br />Jazakallah khair .</p>
+            <Link href="/events/islamic-fiesta" className="mt-3 inline-block px-4 py-2 bg-primary hover:bg-primary-700 text-white rounded hover:bg-primary-dark transition">View Event</Link>
+            <div className="flex flex-row max-[414px]:flex-col items-center min-[414px]:gap-4">
+              <button
+              className=" bg-secondary hover:bg-secondary-700 text-white font-semibold rounded mt-4 px-4 py-2 transition"
+              onClick={() => setShow(false)}
+              aria-label="Close notification"
             >
-              Don't display again
+              Close Popup
             </button>
+              <button
+                className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-700 font-semibold rounded text-white transition"
+                onClick={() => {
+                  setShow(false);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('hideEventNotification', '1');
+                  }
+                }}
+              >
+                Don't display again
+              </button>
+            </div>
           </div>
         </div>
       </div>
