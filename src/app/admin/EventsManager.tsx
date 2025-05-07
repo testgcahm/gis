@@ -93,15 +93,17 @@ export default function EventsManager() {
         setError(null);
         try {
             // Slug logic
-            let slug = form.slug?.trim() || form.title?.toLowerCase().replace(/\s+/g, "-");
+            let slug = form.slug?.trim() || form.title?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
             if (!slug) throw new Error("Title is required.");
+            
             // Prevent duplicate slugs (ignore current event if editing)
             const duplicate = events.find(ev => ev.slug === slug && (!editing || ev.id !== editing.id));
             if (duplicate) {
-                setError("An event with this title already exists.");
+                setError("An event with this URL already exists.");
                 setLoading(false);
                 return;
             }
+            
             let submitForm = { ...form, slug };
             // If adding, assign order 0 and increment others
             if (!editing) {
@@ -162,6 +164,13 @@ export default function EventsManager() {
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.error || "Unknown error");
+            
+            // If the deleted event was being edited, clear the form
+            if (editing && editing.id === id) {
+                setEditing(null);
+                setForm(emptyEvent);
+            }
+            
             fetchEvents();
             setError(null);
             setSuccessMessage('Event deleted successfully!');
@@ -258,6 +267,7 @@ export default function EventsManager() {
                 editing={Boolean(editing)}
                 loading={loading}
                 error={error}
+                events={events} // Pass events data to the form
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
                 handleSpeakerChange={handleSpeakerChange}

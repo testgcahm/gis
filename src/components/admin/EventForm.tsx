@@ -5,6 +5,7 @@ import SubeventsSection from "./SubeventsSection";
 import { FolderType } from "@/types/googleDrive";
 import { arrayMove } from "@dnd-kit/sortable";
 import { SimpleSpinner } from "../Spinner";
+import { RefreshCcw } from "lucide-react";
 
 // Define a SubeventSpeaker interface with an id
 interface SubeventSpeaker {
@@ -30,6 +31,7 @@ type EventFormProps = {
     editing: boolean;
     loading: boolean;
     error: string | null;
+    events: EventData[]; // Add events as a prop instead of fetching
     handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     handleSubmit: (e: React.FormEvent) => void;
     handleSpeakerChange: (idx: number, field: "name" | "bio", value: string) => void;
@@ -43,6 +45,7 @@ export default function EventForm({
     editing,
     loading,
     error,
+    events, // Receive events from parent
     handleChange,
     handleSubmit,
     handleSpeakerChange,
@@ -54,7 +57,35 @@ export default function EventForm({
     const idCounterRef = useRef(0);
     // Create a stable ID generator function
     const generateUniqueId = (prefix: string) => `${prefix}-${++idCounterRef.current}-${Math.random().toString(36).slice(2)}`;
+
+    // Track whether the user has manually edited the slug
+    const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+    // Track when the slug is deliberately cleared
+    const [slugManuallyCleared, setSlugManuallyCleared] = useState(false);
     
+    // Check for duplicate slugs whenever slug or editing changes
+    const [slugExists, setSlugExists] = useState(false);
+    const [slugHasSpaces, setSlugHasSpaces] = useState(false);
+
+    // Check if slug contains spaces
+    useEffect(() => {
+        if (!form.slug) {
+            setSlugExists(false);
+            setSlugHasSpaces(false);
+            return;
+        }
+
+        // Check if slug contains spaces
+        setSlugHasSpaces(form.slug.includes(' '));
+
+        // Check if any other event (not the one being edited) has the same slug
+        const duplicate = events.find(
+            event => event.slug === form.slug && (editing === false || (editing === true && event.id !== form.id))
+        );
+
+        setSlugExists(!!duplicate);
+    }, [form.slug, events, editing, form.id]);
+
     // Ensure subevents and their speakers always have stable IDs
     const normalizedSubevents = useMemo(() => {
         return ((form.subevents as any[]) || []).map(sub => {
@@ -63,13 +94,13 @@ export default function EventForm({
             const speakers = (sub.speakers || []).map((sp: any) => {
                 // Assume sp.id already exists and is stable
                 // If an ID is missing here, it's an issue with how speakers are added/managed
-                return { ...sp, id: sp.id }; 
+                return { ...sp, id: sp.id };
             });
             // If sub.id is missing here, it's an issue with how subevents are added/managed
             return { ...sub, id: sub.id, speakers };
         });
     }, [form.subevents]);
-    
+
     // Local state for subevent image uploading and errors
     const [subeventUploading, setSubeventUploading] = useState<boolean[]>(Array(normalizedSubevents.length).fill(false));
     const [subeventImageErrors, setSubeventImageErrors] = useState<string[]>(Array(normalizedSubevents.length).fill(""));
@@ -79,7 +110,7 @@ export default function EventForm({
     const [mainImageError, setMainImageError] = useState("");
 
     // New: Google Drive images state, updated with size information
-    const [driveImages, setDriveImages] = useState<{id: string, name: string, url: string, sizeKB?: number, isOverSizeLimit?: boolean}[]>([]);
+    const [driveImages, setDriveImages] = useState<{ id: string, name: string, url: string, sizeKB?: number, isOverSizeLimit?: boolean }[]>([]);
     const [driveLoading, setDriveLoading] = useState(false);
     const [driveError, setDriveError] = useState<string | null>(null);
 
@@ -163,16 +194,16 @@ export default function EventForm({
     // Subevent speaker handlers
     const handleSubeventChange = (idx: number, field: string, value: any) => {
         // Use normalizedSubevents as the base for updates to ensure IDs are present
-        const updated = [...normalizedSubevents]; 
+        const updated = [...normalizedSubevents];
         updated[idx] = { ...updated[idx], [field]: value };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
     const handleAddSubevent = () => {
-        const newSubevent = { 
-            time: '', 
-            title: '', 
-            description: '', 
-            speakers: [], 
+        const newSubevent = {
+            time: '',
+            title: '',
+            description: '',
+            speakers: [],
             id: generateUniqueId('subevent') // Generate ID *only* when adding
         };
         const updated = [
@@ -190,7 +221,7 @@ export default function EventForm({
     const handleSubeventSpeakerChange = (subIdx: number, sIdx: number, field: "name" | "bio", value: string) => {
         const updated = [...normalizedSubevents]; // Use normalizedSubevents
         // Ensure speakers array exists and has stable IDs
-        const speakers = [...(updated[subIdx].speakers || [])]; 
+        const speakers = [...(updated[subIdx].speakers || [])];
         if (speakers[sIdx]) { // Check if speaker exists at index
             speakers[sIdx] = { ...speakers[sIdx], [field]: value };
             updated[subIdx] = { ...updated[subIdx], speakers };
@@ -275,30 +306,39 @@ export default function EventForm({
     };
 
     // Slug auto-update logic
+    const prevTitle = useRef(form.title);
     React.useEffect(() => {
-        // Only update slug if user hasn't manually changed it
-        const autoSlug = (form.title || "").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
-        if (
-            (form.slug === undefined || form.slug === "" || form.slug === autoSlug) &&
-            form.title &&
-            form.title.trim() !== ""
-        ) {
-            handleChange({
-                target: {
-                    name: "slug",
-                    value: autoSlug,
-                    type: "text"
-                }
-            } as any);
+        // Do NOT regenerate slug if it was manually cleared
+        if (slugManuallyCleared) {
+            return;
         }
-    }, [form.title]);
+        
+        // Only update slug if title exists and user hasn't manually edited the slug
+        if (form.title && form.title.trim() !== "" && !slugManuallyEdited) {
+            const autoSlug = form.title.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+            
+            // Only update when field is empty (excluding the case where user cleared it)
+            if (form.slug === undefined || form.slug === "") {
+                handleChange({
+                    target: {
+                        name: "slug",
+                        value: autoSlug,
+                        type: "text"
+                    }
+                } as any);
+            }
+        }
+        
+        // Save current title for comparison in next render
+        prevTitle.current = form.title;
+    }, [form.title, form.slug, slugManuallyEdited, slugManuallyCleared]);
 
     // Modal state for image selection
     const [showImageModal, setShowImageModal] = useState(false);
-    const [imageTab, setImageTab] = useState<'upload'|'library'>('upload');
+    const [imageTab, setImageTab] = useState<'upload' | 'library'>('upload');
     // Subevent image modal state
-    const [showSubeventImageModalIdx, setShowSubeventImageModalIdx] = useState<number|null>(null);
-    const [subeventImageTab, setSubeventImageTab] = useState<'upload'|'library'>('upload');
+    const [showSubeventImageModalIdx, setShowSubeventImageModalIdx] = useState<number | null>(null);
+    const [subeventImageTab, setSubeventImageTab] = useState<'upload' | 'library'>('upload');
 
     // Preload Google Drive images in the background when the component mounts
     useEffect(() => {
@@ -313,8 +353,29 @@ export default function EventForm({
             .finally(() => setDriveLoading(false));
     }, []);
 
+    // Custom handler for slug changes to track when it's manually edited
+    const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // If the field is being cleared, mark it as deliberately cleared
+        if (e.target.value === '') {
+            setSlugManuallyCleared(true);
+        } else {
+            // Otherwise, track that user has manually edited the slug
+            setSlugManuallyEdited(true);
+        }
+        
+        // Pass the change to the regular handler
+        handleChange(e);
+    };
+
     return (
-        <form onSubmit={handleSubmit} className="bg-white border-l-4 border-secondary rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.15)] p-8 mb-10 w-full max-w-2xl space-y-5 transition-all duration-700">
+        <form onSubmit={(e) => {
+            // Prevent form submission if slug contains spaces
+            if (form.slug && form.slug.includes(' ')) {
+                e.preventDefault();
+                return;
+            }
+            handleSubmit(e);
+        }} className="bg-white border-l-4 border-secondary rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.15)] p-8 mb-10 w-full max-w-2xl space-y-5 transition-all duration-700">
             <h2 className="text-2xl font-extrabold text-primary mb-4 drop-shadow-sm">{editing ? "Edit Event" : "Add Event"}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -323,16 +384,44 @@ export default function EventForm({
                 </div>
                 <div>
                     <label htmlFor="slug" className="block text-primary font-semibold mb-1">Url <span className='text-red-500'>*</span></label>
-                    <input
-                        id="slug"
-                        name="slug"
-                        value={form.slug || ""}
-                        onChange={handleChange}
-                        className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black"
-                        placeholder="Auto-generated from title or set manually"
-                        required
-                    />
-                    <span className="text-xs text-gray-500">If you want to auto-update the url from the title, clear this field.</span>
+                    <div className="flex items-center space-x-2">
+                        <input
+                            id="slug"
+                            name="slug"
+                            value={form.slug || ""}
+                            onChange={handleSlugChange}
+                            className={`flex-1 p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 ${slugExists || slugHasSpaces ? 'border-red-500 focus:ring-red-500 hover:border-red-500/80 text-red-800' : ''}`}
+                            placeholder="Auto-generated from title or set manually"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (form.title) {
+                                    const autoSlug = form.title.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
+                                    handleChange({
+                                        target: {
+                                            name: "slug",
+                                            value: autoSlug,
+                                            type: "text"
+                                        }
+                                    } as any);
+                                    // Reset manual flags since we're intentionally regenerating
+                                    setSlugManuallyEdited(false);
+                                    setSlugManuallyCleared(false);
+                                }
+                            }}
+                            className="bg-primary text-white px-2 py-2 max-h-9 rounded-lg hover:bg-primary-600 transition-colors"
+                            title="Auto-generate URL from title"
+                            disabled={!form.title}
+                        >
+                            <RefreshCcw className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="text-xs mt-1 flex justify-between">
+                        {slugExists && <span className="text-red-500 font-medium">URL already exists!</span>}
+                        {slugHasSpaces && <span className="text-red-500 font-medium">URL cannot contain spaces!</span>}
+                    </div>
                 </div>
                 <div>
                     <label htmlFor="date" className="block text-primary font-semibold mb-1">Date <span className='text-red-500'>*</span></label>
@@ -379,12 +468,12 @@ export default function EventForm({
             {showImageModal && (
                 <div className="fixed inset-0 z-50 flex items-center h-screen justify-center bg-black/40">
                     <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
-                        <button className="absolute top-2 right-2 text-xl" onClick={()=>setShowImageModal(false)}>&times;</button>
+                        <button className="absolute top-2 right-2 text-xl" onClick={() => setShowImageModal(false)}>&times;</button>
                         <div className="flex gap-2 mb-4">
-                            <button type="button" className={`px-3 py-1 rounded ${imageTab==='upload'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setImageTab('upload')}>Upload from PC</button>
-                            <button type="button" className={`px-3 py-1 rounded ${imageTab==='library'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setImageTab('library')}>Select from Library</button>
+                            <button type="button" className={`px-3 py-1 rounded ${imageTab === 'upload' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setImageTab('upload')}>Upload from PC</button>
+                            <button type="button" className={`px-3 py-1 rounded ${imageTab === 'library' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setImageTab('library')}>Select from Library</button>
                         </div>
-                        {imageTab==='upload' && (
+                        {imageTab === 'upload' && (
                             <>
                                 <input
                                     id="image-upload-modal"
@@ -402,7 +491,7 @@ export default function EventForm({
                                 </label>
                             </>
                         )}
-                        {imageTab==='library' && (
+                        {imageTab === 'library' && (
                             <div>
                                 <div className="font-bold text-lg mb-2 text-primary-700 text-center">Select an image from your library</div>
                                 {driveLoading && <div className="text-center py-6"><SimpleSpinner /></div>}
@@ -416,8 +505,8 @@ export default function EventForm({
                                             key={img.id}
                                             type="button"
                                             className="relative group focus:outline-none"
-                                            title={img.isOverSizeLimit 
-                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)` 
+                                            title={img.isOverSizeLimit
+                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)`
                                                 : `${img.name} (${img.sizeKB}KB)`}
                                             onClick={() => !img.isOverSizeLimit && handleSelectMainImageFromLibrary(img.url)}
                                             disabled={img.isOverSizeLimit}
@@ -427,9 +516,9 @@ export default function EventForm({
                                                     src={img.url}
                                                     alt={img.name}
                                                     className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
-                                                        ${img.isOverSizeLimit 
-                                                        ? 'border-red-500 opacity-70' 
-                                                        : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
+                                                        ${img.isOverSizeLimit
+                                                            ? 'border-red-500 opacity-70'
+                                                            : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
                                                 />
                                                 {img.isOverSizeLimit && (
                                                     <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
@@ -455,12 +544,12 @@ export default function EventForm({
             {showSubeventImageModalIdx !== null && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
-                        <button className="absolute top-2 right-2 text-xl" onClick={()=>setShowSubeventImageModalIdx(null)}>&times;</button>
+                        <button className="absolute top-2 right-2 text-xl" onClick={() => setShowSubeventImageModalIdx(null)}>&times;</button>
                         <div className="flex gap-2 mb-4">
-                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab==='upload'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setSubeventImageTab('upload')}>Upload from PC</button>
-                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab==='library'?'bg-primary text-white':'bg-gray-200 text-primary'}`} onClick={()=>setSubeventImageTab('library')}>Select from Library</button>
+                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab === 'upload' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setSubeventImageTab('upload')}>Upload from PC</button>
+                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab === 'library' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setSubeventImageTab('library')}>Select from Library</button>
                         </div>
-                        {subeventImageTab==='upload' && (
+                        {subeventImageTab === 'upload' && (
                             <>
                                 <input
                                     id="subevent-image-upload-modal"
@@ -468,17 +557,19 @@ export default function EventForm({
                                     accept="image/png,image/jpeg,image/jpg"
                                     style={{ display: 'none' }}
                                     onChange={async (e) => {
-                                        await handleSubeventImageChange(e, showSubeventImageModalIdx);
-                                        setShowSubeventImageModalIdx(null);
+                                        if (showSubeventImageModalIdx !== null) {
+                                            await handleSubeventImageChange(e, showSubeventImageModalIdx);
+                                            setShowSubeventImageModalIdx(null);
+                                        }
                                     }}
-                                    disabled={subeventUploading[showSubeventImageModalIdx]}
+                                    disabled={showSubeventImageModalIdx !== null && subeventUploading[showSubeventImageModalIdx]}
                                 />
                                 <label htmlFor="subevent-image-upload-modal" className="w-full flex items-center justify-center px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
-                                    {subeventUploading[showSubeventImageModalIdx] ? <SimpleSpinner className='w-5 h-5' /> : 'Click to select image (jpg, jpeg, png)'}
+                                    {showSubeventImageModalIdx !== null && subeventUploading[showSubeventImageModalIdx] ? <SimpleSpinner className='w-5 h-5' /> : 'Click to select image (jpg, jpeg, png)'}
                                 </label>
                             </>
                         )}
-                        {subeventImageTab==='library' && (
+                        {subeventImageTab === 'library' && (
                             <div>
                                 <div className="font-bold text-lg mb-2 text-primary-700 text-center">Select an image from your library</div>
                                 {driveLoading && <div className="text-center py-6"><SimpleSpinner /></div>}
@@ -492,8 +583,8 @@ export default function EventForm({
                                             key={img.id}
                                             type="button"
                                             className="relative group focus:outline-none"
-                                            title={img.isOverSizeLimit 
-                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)` 
+                                            title={img.isOverSizeLimit
+                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)`
                                                 : `${img.name} (${img.sizeKB}KB)`}
                                             onClick={() => !img.isOverSizeLimit && handleSelectSubeventImageFromLibrary(showSubeventImageModalIdx, img.url)}
                                             disabled={img.isOverSizeLimit}
@@ -503,9 +594,9 @@ export default function EventForm({
                                                     src={img.url}
                                                     alt={img.name}
                                                     className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
-                                                        ${img.isOverSizeLimit 
-                                                        ? 'border-red-500 opacity-70' 
-                                                        : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
+                                                        ${img.isOverSizeLimit
+                                                            ? 'border-red-500 opacity-70'
+                                                            : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
                                                 />
                                                 {img.isOverSizeLimit && (
                                                     <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">

@@ -132,7 +132,13 @@ export async function DELETE(request: Request) {
     
     // Get the event data before deleting to get the slug
     const eventRef = adminDb.collection('events').doc(id);
-    await eventRef.get();
+    const eventDoc = await eventRef.get();
+    const eventData = eventDoc.data();
+    
+    // Revalidate the specific event page if slug exists before deleting
+    if (eventData?.slug) {
+      revalidatePath(`/events/${eventData.slug}`);
+    }
     
     await eventRef.delete();
     
