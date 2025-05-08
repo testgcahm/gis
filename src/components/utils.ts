@@ -15,3 +15,16 @@ export const spaceInNumber = (phoneNumber: string) => {
 
 export const phoneNumber = '+923434369958';
 export const email = 'gmcislamicsociety1199@gmail.com';
+
+export let ALLOWED_EMAILS = [
+    'abidahmed094@gmail.com',
+    'muhammadosama1515@gmail.com'
+];
+
+export const MERGE_EMAILS = [
+    'abidahmed094@gmail.com',
+    'muhammadosama1515@gmail.com',
+    'hamzazubair.3111@gmail.com',
+    'gmcislamicsociety1199@gmail.com',
+    'aqsa59759@gmail.com'
+];

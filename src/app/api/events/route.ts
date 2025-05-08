@@ -3,21 +3,9 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
+import { ALLOWED_EMAILS, MERGE_EMAILS } from '@/components/utils';
 
 const merge = false;
-
-let ALLOWED_EMAILS = [
-  'abidahmed094@gmail.com',
-  'muhammadosama1515@gmail.com'
-];
-
-const MERGE_EMAILS = [
-  'abidahmed094@gmail.com',
-  'muhammadosama1515@gmail.com',
-  'hamzazubair.3111@gmail.com',
-  'gmcislamicsociety1199@gmail.com',
-  'aqsa59759@gmail.com'
-]
 
 async function verifyRequest(request: Request) {
   const authHeader = request.headers.get('authorization');
