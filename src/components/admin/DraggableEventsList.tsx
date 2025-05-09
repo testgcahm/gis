@@ -1,26 +1,36 @@
 import React from "react";
 import { EventData } from "@/components/events/types";
-import { MoveVertical } from "lucide-react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import Spinner from "@/components/Spinner";
 
-// Sortable event card component
-function SortableEventItem({ event, listeners, attributes, setNodeRef, style, onEdit, onDelete }: any) {
+// Event card component with move up/down buttons
+type EventItemProps = {
+    event: EventData;
+    onEdit: (event: EventData) => void;
+    onDelete: (id: string) => void;
+    onMoveUp: (event: EventData) => void;
+    onMoveDown: (event: EventData) => void;
+    isFirst: boolean;
+    isLast: boolean;
+};
+
+function EventItem({ event, onEdit, onDelete, onMoveUp, onMoveDown, isFirst, isLast }: EventItemProps) {
     return (
         <div className="bg-white border border-primary-100 rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            {/* Draggable area */}
-            <div
-                ref={setNodeRef}
-                style={style}
-                {...attributes}
-                {...listeners}
-                className="flex-grow flex items-center gap-3 cursor-move"
-            >
-                <div className="text-gray-400">
-                    <MoveVertical size={20} />
-                </div>
+            {/* Event info */}
+            {/* Move up/down buttons */}
+            <div className="flex flex-col gap-1 mr-2">
+                <button
+                    className={`px-2 py-1 rounded max-w-8 bg-primary-100 text-primary-700 font-bold shadow ${isFirst ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-200'}`}
+                    onClick={() => onMoveUp(event)}
+                    disabled={isFirst}
+                >↑</button>
+                <button
+                    className={`px-2 py-1 rounded max-w-8 bg-primary-100 text-primary-700 font-bold shadow ${isLast ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-200'}`}
+                    onClick={() => onMoveDown(event)}
+                    disabled={isLast}
+                >↓</button>
+            </div>
+            <div className="flex-grow flex items-center gap-3">
                 <div className="flex-grow">
                     <div className="font-bold text-lg text-primary-700">{event.title}</div>
                     <div className="text-sm text-primary-500">{event.date} | {event.time} | {event.venue}</div>
@@ -28,38 +38,19 @@ function SortableEventItem({ event, listeners, attributes, setNodeRef, style, on
                 </div>
             </div>
 
-            {/* Action buttons - outside the draggable area */}
-            <div className="flex gap-2">
+            {/* Action buttons */}
+            <div className="flex justify-end gap-2">
                 <button
                     className="bg-secondary hover:bg-secondary/90 text-white font-bold px-4 py-2 rounded shadow"
                     onClick={() => onEdit(event)}
                 >Edit</button>
                 <button
                     className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded shadow"
-                    onClick={() => onDelete(event.id)}
+                    onClick={() => event.id && onDelete(event.id)}
+                    disabled={!event.id}
                 >Delete</button>
             </div>
         </div>
-    );
-}
-
-function DraggableEvent({ event, onEdit, onDelete }: any) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: event.slug });
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-    };
-    return (
-        <SortableEventItem
-            event={event}
-            listeners={listeners}
-            attributes={attributes}
-            setNodeRef={setNodeRef}
-            style={style}
-            onEdit={onEdit}
-            onDelete={onDelete}
-        />
     );
 }
 
@@ -69,7 +60,8 @@ type DraggableEventsListProps = {
     orderChanged: boolean;
     handleEdit: (event: EventData) => void;
     handleDelete: (id: string) => void;
-    handleDragEnd: (event: any) => void;
+    handleMoveUp: (event: EventData) => void;
+    handleMoveDown: (event: EventData) => void;
     handleSaveOrder: () => void;
 };
 
@@ -79,7 +71,8 @@ export default function DraggableEventsList({
     orderChanged,
     handleEdit,
     handleDelete,
-    handleDragEnd,
+    handleMoveUp,
+    handleMoveDown,
     handleSaveOrder,
 }: DraggableEventsListProps) {
     // Always sort events by their 'order' property before rendering
@@ -92,16 +85,21 @@ export default function DraggableEventsList({
                 )}
             </h2>
             {loading ? <div className="text-primary-700 pl-20 pt-10"><Spinner /></div> : (
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={sortedEvents.map(e => e.slug)} strategy={verticalListSortingStrategy}>
-                        <div className="grid gap-6">
-                            {sortedEvents.length === 0 && <div className="text-gray-500">No events found.</div>}
-                            {sortedEvents.map((event) => (
-                                <DraggableEvent key={event.slug} event={event} onEdit={handleEdit} onDelete={handleDelete} />
-                            ))}
-                        </div>
-                    </SortableContext>
-                </DndContext>
+                <div className="grid gap-6">
+                    {sortedEvents.length === 0 && <div className="text-gray-500">No events found.</div>}
+                    {sortedEvents.map((event, idx) => (
+                        <EventItem
+                            key={event.slug}
+                            event={event}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onMoveUp={handleMoveUp}
+                            onMoveDown={handleMoveDown}
+                            isFirst={idx === 0}
+                            isLast={idx === sortedEvents.length - 1}
+                        />
+                    ))}
+                </div>
             )}
         </div>
     );

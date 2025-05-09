@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { EventData } from "@/components/events/types";
 import { motion } from "framer-motion";
-import { arrayMove } from "@dnd-kit/sortable";
 import DraggableEventsList from "@/components/admin/DraggableEventsList";
 import EventForm from "@/components/admin/EventForm";
 import { emptyEvent } from "@/components/admin/types";
@@ -28,7 +27,13 @@ export default function EventsManager() {
             const res = await fetch("/api/events");
             const data = await res.json();
             // Ensure each event has an id property
-            setEvents((data.eventsArray || []).map((e: any) => ({ ...e, id: e.id })));
+            let eventData = (data.eventsArray || []).map((e: EventData) => ({ ...e, id: e.id }));
+            
+            // Sort by order and normalize the order values to be sequential
+            eventData = eventData.sort((a: EventData, b: EventData) => (a.order ?? 0) - (b.order ?? 0))
+                .map((e: EventData, idx: number) => ({ ...e, order: idx }));
+
+            setEvents(eventData);
         } catch (e) {
             setError("Failed to load events");
         }
@@ -131,8 +136,8 @@ export default function EventsManager() {
             setError(null);
             setSuccessMessage('Event saved successfully!');
             setTimeout(() => setSuccessMessage(null), 3000);
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : String(e));
         }
         setLoading(false);
     };
@@ -175,21 +180,50 @@ export default function EventsManager() {
             setError(null);
             setSuccessMessage('Event deleted successfully!');
             setTimeout(() => setSuccessMessage(null), 3000);
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : String(e));
         }
         setLoading(false);
     };
 
-    // Handle drag end
-    const handleDragEnd = (event: any) => {
-        const { active, over } = event;
-        if (active.id !== over?.id) {
-            const oldIndex = events.findIndex(e => e.slug === active.id);
-            const newIndex = events.findIndex(e => e.slug === over.id);
-            // Reorder and update the order property for each event
-            const newEvents = arrayMove(events, oldIndex, newIndex).map((e, i) => ({ ...e, order: i }));
-            setEvents(newEvents);
+    // Move event up
+    const handleMoveUp = (event: EventData) => {
+        const idx = events.findIndex(e => e.id === event.id);
+        if (idx > 0) {
+            const newEvents = [...events];
+            // Swap order property with previous event only
+            const prevOrder = newEvents[idx - 1].order;
+            newEvents[idx - 1].order = newEvents[idx].order;
+            newEvents[idx].order = prevOrder;
+            
+            // Sort by order after swap
+            let updated = [...newEvents].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+            
+            // Reassign order to match array index
+            updated = updated.map((e, i) => ({ ...e, order: i }));
+            
+            setEvents(updated);
+            setOrderChanged(true);
+        }
+    };
+
+    // Move event down
+    const handleMoveDown = (event: EventData) => {
+        const idx = events.findIndex(e => e.id === event.id);
+        if (idx < events.length - 1) {
+            const newEvents = [...events];
+            // Swap order property with next event only
+            const nextOrder = newEvents[idx + 1].order;
+            newEvents[idx + 1].order = newEvents[idx].order;
+            newEvents[idx].order = nextOrder;
+            
+            // Sort by order after swap
+            let updated = [...newEvents].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+            
+            // Reassign order to match array index
+            updated = updated.map((e, i) => ({ ...e, order: i }));
+            
+            setEvents(updated);
             setOrderChanged(true);
         }
     };
@@ -217,8 +251,8 @@ export default function EventsManager() {
             setError(null);
             setSuccessMessage('Order saved successfully!');
             setTimeout(() => setSuccessMessage(null), 3000);
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : String(e));
         }
         setLoading(false);
     };
@@ -285,7 +319,8 @@ export default function EventsManager() {
                     orderChanged={orderChanged}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
-                    handleDragEnd={handleDragEnd}
+                    handleMoveUp={handleMoveUp}
+                    handleMoveDown={handleMoveDown}
                     handleSaveOrder={handleSaveOrder}
                 />}
         </motion.div>

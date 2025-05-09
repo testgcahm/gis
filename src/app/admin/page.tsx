@@ -8,6 +8,7 @@ import Spinner, { SimpleSpinner } from '@/components/Spinner'
 import { motion } from 'framer-motion'
 import { User } from 'lucide-react'
 import Link from 'next/link'
+import { PublishType } from '@/types/publish'
 
 let ALLOWED_EMAILS = [
     'abidahmed094@gmail.com',
@@ -36,6 +37,7 @@ const EventsPage = () => {
     const [allowed, setAllowed] = useState(false);
     const [showPublishConfirm, setShowPublishConfirm] = useState(false);
     const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+    const [publishType, setPublishType] = useState<PublishType | null>(null);
 
     const allowedEmails = allEmails ? MERGE_EMAILS : ALLOWED_EMAILS;
     // Add ref for scroll position
@@ -163,14 +165,22 @@ const EventsPage = () => {
                                     </div>
                                 )}
                                 <EventsManager />
-                                <div className="flex-1 flex mb-10 justify-center">
+                                <div className="flex-1 space-x-4 flex mb-10 justify-center">
                                     <button
                                         className="bg-green-600 disabled:bg-primary-300 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-2"
-                                        onClick={() => setShowPublishConfirm(true)}
+                                        onClick={() => { setShowPublishConfirm(true); setPublishType(PublishType.Revalidate); }}
                                         disabled={loading}
                                     >
-                                        {loading ? <SimpleSpinner /> : null}
+                                        {loading && publishType === PublishType.Revalidate ? <SimpleSpinner /> : null}
                                         <span>Manual Revalidate</span>
+                                    </button>
+                                    <button
+                                        className="bg-primary-600 disabled:bg-primary-300 hover:bg-primary-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none flex items-center gap-2"
+                                        onClick={() => { setShowPublishConfirm(true); setPublishType(PublishType.Build); }}
+                                        disabled={loading}
+                                    >
+                                        {loading && publishType === PublishType.Build ? <SimpleSpinner /> : null}
+                                        <span>Full Rebuild</span>
                                     </button>
                                 </div>
                             </div>
@@ -238,8 +248,14 @@ const EventsPage = () => {
             {showPublishConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 bg-opacity-40">
                     <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
-                        <h2 className="text-xl font-bold mb-2 text-primary-700">Confirm Manual Revalidation</h2>
-                        <p className="mb-4 text-gray-700">This will rebuild events pages and refresh cached content. Only needed if your pages don't match the current data.</p>
+                        <h2 className="text-xl font-bold mb-2 text-primary-700">
+                            {publishType === PublishType.Build ? 'Confirm Full Rebuild' : 'Confirm Manual Revalidation'}
+                        </h2>
+                        <p className="mb-4 text-gray-700">
+                            {publishType === PublishType.Build
+                                ? 'This will trigger a full rebuild of all event pages and clear all caches. Use only if you want to force a complete refresh.'
+                                : 'This will rebuild events pages and refresh cached content. Only needed if your pages don\'t match the current data.'}
+                        </p>
                         <div className="flex justify-center gap-4">
                             <button
                                 className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none"
@@ -248,29 +264,36 @@ const EventsPage = () => {
                                     setLoading(true);
                                     try {
                                         const user = auth.currentUser;
-
                                         if (!user) throw new Error('Not authenticated');
                                         const token = await user.getIdToken();
+                                        let body = {};
+                                        if (publishType === PublishType.Build) {
+                                            body = { mode: PublishType.Build };
+                                        }
                                         const res = await fetch('/api/publish', {
-                                            method: 'GET',
-                                            headers: { 'Authorization': `Bearer ${token}` }
+                                            method: 'POST',
+                                            headers: {
+                                                'Authorization': `Bearer ${token}`,
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify(body),
                                         });
                                         const data = await res.json();
                                         if (data.success) {
-                                            setPublishSuccess(data.message || 'Publish successful!');
+                                            setPublishSuccess(data.message || (publishType === PublishType.Build ? 'Full rebuild successful!' : 'Revalidation successful!'));
                                             setTimeout(() => setPublishSuccess(null), 3000);
                                         } else {
                                             alert(data.error || 'Publish failed.');
                                         }
-                                    } catch (err: any) {
-                                        alert(err.message || 'Publish failed.');
+                                    } catch (err: unknown) {
+                                        alert(err instanceof Error ? err.message : 'Publish failed.');
                                     } finally {
                                         setLoading(false);
                                     }
                                 }}
                                 disabled={loading}
                             >
-                                Yes, Rebuild
+                                {publishType === PublishType.Build ? 'Yes, Full Rebuild' : 'Yes, Revalidate'}
                             </button>
                             <button
                                 className="bg-gray-300 hover:bg-gray-400 text-primary-700 font-bold px-4 py-2 rounded shadow-sm transition-all duration-200 focus:outline-none"
@@ -287,7 +310,7 @@ const EventsPage = () => {
             {publishSuccess && (
                 <div style={{
                     position: 'fixed',
-                    top: '80px',
+                    top: '40px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 1000,

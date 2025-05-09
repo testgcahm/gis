@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
         let formData: FormData;
         try {
             formData = await req.formData();
-        } catch (err) {
+        } catch (err: unknown) {
             return errorResponse('Invalid form data', 400, err);
         }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         let credentials;
         try {
             credentials = JSON.parse(serviceAccountJson);
-        } catch (err) {
+        } catch (err: unknown) {
             return errorResponse('Invalid GOOGLE_SERVICE_ACCOUNT_JSON format', 500, err);
         }
         const auth = new google.auth.GoogleAuth({
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
                 },
                 fields: 'id',
             });
-        } catch (err) {
+        } catch (err: unknown) {
             return errorResponse('Failed to upload to Google Drive', 502, err);
         }
         const fileId = driveRes.data.id;
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
                 fileId,
                 requestBody: { role: 'reader', type: 'anyone' },
             });
-        } catch (err) {
+        } catch (err: unknown) {
             // Not fatal, but log
             console.error('Failed to set file public', err);
         }
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, url });
 
-    } catch (err) {
+    } catch (err: unknown) {
         return errorResponse('Unexpected server error', 500, err);
     }
 }

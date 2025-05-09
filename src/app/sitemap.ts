@@ -61,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Fetch all events and add their dynamic URLs
     const events = await fetchEvents();
-    const eventRoutes = events.map((event: any) => ({
+    const eventRoutes = events.map((event: { slug: string; image: string }) => ({
         url: escapeXmlUrl(`${baseUrl}events/${event.slug}`),
         lastModified: new Date(),
         priority: 0.76,

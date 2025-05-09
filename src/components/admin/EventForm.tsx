@@ -3,7 +3,6 @@ import { EventData } from "@/components/events/types";
 import SpeakersSection from "./SpeakersSection";
 import SubeventsSection from "./SubeventsSection";
 import { FolderType } from "@/types/googleDrive";
-import { arrayMove } from "@dnd-kit/sortable";
 import { SimpleSpinner } from "../Spinner";
 import { RefreshCcw } from "lucide-react";
 
@@ -88,10 +87,10 @@ export default function EventForm({
 
     // Ensure subevents and their speakers always have stable IDs
     const normalizedSubevents = useMemo(() => {
-        return ((form.subevents as any[]) || []).map(sub => {
+        return ((form.subevents as SubeventWithError[]) || []).map(sub => {
             // Assume sub.id already exists and is stable
             // Ensure speakers within the subevent also have stable IDs
-            const speakers = (sub.speakers || []).map((sp: any) => {
+            const speakers = (sub.speakers || []).map((sp: SubeventSpeaker) => {
                 // Assume sp.id already exists and is stable
                 // If an ID is missing here, it's an issue with how speakers are added/managed
                 return { ...sp, id: sp.id };
@@ -192,8 +191,7 @@ export default function EventForm({
     };
     // Subevent state and handlers remain
     // Subevent speaker handlers
-    const handleSubeventChange = (idx: number, field: string, value: any) => {
-        // Use normalizedSubevents as the base for updates to ensure IDs are present
+    const handleSubeventChange = (idx: number, field: string, value: unknown) => {
         const updated = [...normalizedSubevents];
         updated[idx] = { ...updated[idx], [field]: value };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
@@ -294,15 +292,15 @@ export default function EventForm({
         setMainImageUploading(false);
     };
 
-    // Handle subevent drag end (reorder)
-    const handleSubeventDragEnd = (event: any) => {
-        const { active, over } = event;
-        if (!over || active.id === over.id) return;
-        const oldIndex = normalizedSubevents.findIndex(sub => sub.id === active.id);
-        const newIndex = normalizedSubevents.findIndex(sub => sub.id === over.id);
-        if (oldIndex === -1 || newIndex === -1) return;
-        const updated = arrayMove(normalizedSubevents, oldIndex, newIndex).map((sub, i) => ({ ...sub, order: i }));
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
+    // Handle subevent move up/down
+    const handleMoveSubevent = (fromIdx: number, toIdx: number) => {
+        if (toIdx < 0 || toIdx >= normalizedSubevents.length) return;
+        const updated = [...normalizedSubevents];
+        const [moved] = updated.splice(fromIdx, 1);
+        updated.splice(toIdx, 0, moved);
+        // Update order field if needed
+        const withOrder = updated.map((sub, i) => ({ ...sub, order: i }));
+        handleChange({ target: { name: 'subevents', value: withOrder } } as any);
     };
 
     // Slug auto-update logic
@@ -375,14 +373,14 @@ export default function EventForm({
                 return;
             }
             handleSubmit(e);
-        }} className="bg-white border-l-4 border-secondary rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.15)] p-8 mb-10 w-full max-w-2xl space-y-5 transition-all duration-700">
+        }} className="bg-white border-l-4 border-secondary rounded-2xl shadow-[2px_2px_8px_2px_rgba(102,102,153,0.15)] max-[480px]:px-4 max-[360px]:px-2 p-8 mb-10 w-full max-w-2xl space-y-5 transition-all duration-700">
             <h2 className="text-2xl font-extrabold text-primary mb-4 drop-shadow-sm">{editing ? "Edit Event" : "Add Event"}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+                <div className="sm:col-span-2">
                     <label htmlFor="title" className="block text-primary font-semibold mb-1">Title <span className='text-red-500'>*</span></label>
                     <input id="title" name="title" value={form.title || ""} onChange={handleChange} className="w-full p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 text-black" required />
                 </div>
-                <div>
+                <div className="sm:col-span-2">
                     <label htmlFor="slug" className="block text-primary font-semibold mb-1">Url <span className='text-red-500'>*</span></label>
                     <div className="flex items-center space-x-2">
                         <input
@@ -390,7 +388,7 @@ export default function EventForm({
                             name="slug"
                             value={form.slug || ""}
                             onChange={handleSlugChange}
-                            className={`flex-1 p-3 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 ${slugExists || slugHasSpaces ? 'border-red-500 focus:ring-red-500 hover:border-red-500/80 text-red-800' : ''}`}
+                            className={`flex-1 p-3 border w-full rounded-lg focus:outline-none transition-all duration-300 focus:ring-1 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 border-gray-300 ${slugExists || slugHasSpaces ? 'border-red-500 focus:ring-red-500 hover:border-red-500/80 text-red-800' : ''}`}
                             placeholder="Auto-generated from title or set manually"
                             required
                         />
@@ -680,7 +678,7 @@ export default function EventForm({
                 handleSubeventSpeakerChange={handleSubeventSpeakerChange}
                 handleAddSubeventSpeaker={handleAddSubeventSpeaker}
                 handleRemoveSubeventSpeaker={handleRemoveSubeventSpeaker}
-                onSubeventDragEnd={handleSubeventDragEnd}
+                handleMoveSubevent={handleMoveSubevent}
                 driveImages={driveImages}
                 driveLoading={driveLoading}
                 driveError={driveError}

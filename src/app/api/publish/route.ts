@@ -37,7 +37,7 @@ async function triggerVercelBuild() {
     }
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     const auth = await verifyRequest(request);
     if (auth.error) {
         return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
@@ -58,12 +58,9 @@ export async function GET(request: Request) {
             await triggerVercelBuild();
             return NextResponse.json({ success: true, message: 'Vercel build triggered' });
         } else {
-            // Revalidate the main events page
             revalidatePath('/events');
-            // Get all events from Firestore to revalidate individual event pages
             const eventsSnapshot = await adminDb.collection('events').get();
             const eventSlugs = eventsSnapshot.docs.map(doc => doc.data().slug).filter(Boolean);
-            // Revalidate each individual event page
             for (const slug of eventSlugs) {
                 revalidatePath(`/events/${slug}`);
             }
