@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { Readable } from 'stream';
 import { FolderType } from '@/types/googleDrive';
+import { revalidatePath } from 'next/cache';
 
 function errorResponse(error: string, status = 500, details?: unknown) {
     console.error(error, details ?? '');
@@ -96,6 +97,8 @@ export async function POST(req: NextRequest) {
             console.error('Failed to set file public', err);
         }
         const url = folderType === FolderType.Events ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000` : `https://drive.google.com/uc?id=${fileId}`;
+        
+        folderType === FolderType.Events && revalidatePath('/admin');
 
         return NextResponse.json({ success: true, url });
 

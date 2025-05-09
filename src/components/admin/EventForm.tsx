@@ -171,12 +171,7 @@ export default function EventForm({
             if (data.success && data.url) {
                 updated[idx] = { ...updated[idx], imageUrl: data.url, imageError: '' };
                 setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = ''; return arr; });
-                // Refresh drive images after upload
-                fetch('/api/drive-images')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) setDriveImages(data.images);
-                    });
+
             } else {
                 updated[idx] = { ...updated[idx], imageUrl: '', imageError: 'Image upload failed: ' + (data.error || 'Unknown error') };
                 setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = 'Image upload failed: ' + (data.error || 'Unknown error'); return arr; });
@@ -275,12 +270,6 @@ export default function EventForm({
             if (data.success && data.url) {
                 handleChange({ target: { name: 'image', value: data.url } } as any);
                 setMainImageError("");
-                // Refresh drive images after upload
-                fetch('/api/drive-images')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) setDriveImages(data.images);
-                    });
             } else {
                 setMainImageError('Image upload failed: ' + (data.error || 'Unknown error'));
                 handleChange({ target: { name: 'image', value: '' } } as any);

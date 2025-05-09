@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import SubeventSpeakersSection from "./SubeventSpeakersSection";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { SimpleSpinner } from "../Spinner";
-import LibraryModal from './LibraryModal';
 
 interface SubeventWithError {
     time: string;
