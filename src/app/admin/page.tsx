@@ -253,7 +253,7 @@ const EventsPage = () => {
                         </h2>
                         <p className="mb-4 text-gray-700">
                             {publishType === PublishType.Build
-                                ? 'This will trigger a full rebuild of all event pages and clear all caches. Use only if you want to force a complete refresh.'
+                                ? 'This will trigger a full rebuild of all event pages and clear all caches. Use only if you want to force a complete refresh. This will take 2 mins to complete'
                                 : 'This will rebuild events pages and refresh cached content. Only needed if your pages don\'t match the current data.'}
                         </p>
                         <div className="flex justify-center gap-4">
