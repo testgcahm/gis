@@ -8,8 +8,9 @@ import EventForm from "@/components/admin/EventForm";
 import { emptyEvent } from "@/components/admin/types";
 import { getAuth } from 'firebase/auth';
 import Spinner from "@/components/Spinner";
+import { DriveImage } from '@/types/googleDrive';
 
-export default function EventsManager() {
+export default function EventsManager({ driveImages }: { driveImages: DriveImage[] }) {
     const [events, setEvents] = useState<EventData[]>([]);
     const [loading, setLoading] = useState(false);
     const [editing, setEditing] = useState<Partial<EventData> | null>(null);
@@ -308,6 +309,7 @@ export default function EventsManager() {
                 handleAddSpeaker={handleAddSpeaker}
                 handleRemoveSpeaker={handleRemoveSpeaker}
                 handleCancel={handleCancel}
+                driveImages={driveImages}
             />
             {loading ? (
                 <Spinner />

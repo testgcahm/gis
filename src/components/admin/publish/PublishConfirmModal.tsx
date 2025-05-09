@@ -11,6 +11,7 @@ interface PublishConfirmModalProps {
 }
 
 const PublishConfirmModal: React.FC<PublishConfirmModalProps> = ({ show, loading, publishType, onConfirm, onCancel }) => {
+
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 bg-opacity-40">

@@ -5,6 +5,7 @@ import SubeventsSection from "./SubeventsSection";
 import { FolderType } from "@/types/googleDrive";
 import { SimpleSpinner } from "../Spinner";
 import { RefreshCcw } from "lucide-react";
+import { DriveImage } from '@/types/googleDrive';
 
 // Define a SubeventSpeaker interface with an id
 interface SubeventSpeaker {
@@ -30,13 +31,14 @@ type EventFormProps = {
     editing: boolean;
     loading: boolean;
     error: string | null;
-    events: EventData[]; // Add events as a prop instead of fetching
+    events: EventData[];
     handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     handleSubmit: (e: React.FormEvent) => void;
     handleSpeakerChange: (idx: number, field: "name" | "bio", value: string) => void;
     handleAddSpeaker: () => void;
     handleRemoveSpeaker: (idx: number) => void;
     handleCancel: () => void;
+    driveImages?: DriveImage[];
 };
 
 export default function EventForm({
@@ -44,13 +46,14 @@ export default function EventForm({
     editing,
     loading,
     error,
-    events, // Receive events from parent
+    events,
     handleChange,
     handleSubmit,
     handleSpeakerChange,
     handleAddSpeaker,
     handleRemoveSpeaker,
     handleCancel,
+    driveImages: staticDriveImages,
 }: EventFormProps) {
     // Store a stable reference to a counter for generating unique IDs
     const idCounterRef = useRef(0);
@@ -61,7 +64,7 @@ export default function EventForm({
     const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
     // Track when the slug is deliberately cleared
     const [slugManuallyCleared, setSlugManuallyCleared] = useState(false);
-    
+
     // Check for duplicate slugs whenever slug or editing changes
     const [slugExists, setSlugExists] = useState(false);
     const [slugHasSpaces, setSlugHasSpaces] = useState(false);
@@ -109,9 +112,27 @@ export default function EventForm({
     const [mainImageError, setMainImageError] = useState("");
 
     // New: Google Drive images state, updated with size information
-    const [driveImages, setDriveImages] = useState<{ id: string, name: string, url: string, sizeKB?: number, isOverSizeLimit?: boolean }[]>([]);
+    const [driveImages, setDriveImages] = useState(staticDriveImages || []);
     const [driveLoading, setDriveLoading] = useState(false);
     const [driveError, setDriveError] = useState<string | null>(null);
+
+    // Fetch latest images from Drive
+    const refreshDriveImages = async () => {
+        setDriveLoading(true);
+        setDriveError(null);
+        try {
+            const res = await fetch('/api/drive-images');
+            const data = await res.json();
+            if (data.success && Array.isArray(data.images)) {
+                setDriveImages(data.images);
+            } else {
+                setDriveError(data.error || 'Failed to fetch images');
+            }
+        } catch (err) {
+            setDriveError('Failed to fetch images');
+        }
+        setDriveLoading(false);
+    };
 
     // New: Handler for selecting image from library (simplified)
     const handleSelectMainImageFromLibrary = (url: string) => {
@@ -172,11 +193,7 @@ export default function EventForm({
                 updated[idx] = { ...updated[idx], imageUrl: data.url, imageError: '' };
                 setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = ''; return arr; });
                 // Refresh drive images after upload
-                fetch('/api/drive-images')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) setDriveImages(data.images);
-                    });
+                await refreshDriveImages();
             } else {
                 updated[idx] = { ...updated[idx], imageUrl: '', imageError: 'Image upload failed: ' + (data.error || 'Unknown error') };
                 setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = 'Image upload failed: ' + (data.error || 'Unknown error'); return arr; });
@@ -276,11 +293,7 @@ export default function EventForm({
                 handleChange({ target: { name: 'image', value: data.url } } as any);
                 setMainImageError("");
                 // Refresh drive images after upload
-                fetch('/api/drive-images')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) setDriveImages(data.images);
-                    });
+                await refreshDriveImages();
             } else {
                 setMainImageError('Image upload failed: ' + (data.error || 'Unknown error'));
                 handleChange({ target: { name: 'image', value: '' } } as any);
@@ -310,11 +323,11 @@ export default function EventForm({
         if (slugManuallyCleared) {
             return;
         }
-        
+
         // Only update slug if title exists and user hasn't manually edited the slug
         if (form.title && form.title.trim() !== "" && !slugManuallyEdited) {
             const autoSlug = form.title.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
-            
+
             // Only update when field is empty (excluding the case where user cleared it)
             if (form.slug === undefined || form.slug === "") {
                 handleChange({
@@ -326,7 +339,7 @@ export default function EventForm({
                 } as any);
             }
         }
-        
+
         // Save current title for comparison in next render
         prevTitle.current = form.title;
     }, [form.title, form.slug, slugManuallyEdited, slugManuallyCleared]);
@@ -338,19 +351,6 @@ export default function EventForm({
     const [showSubeventImageModalIdx, setShowSubeventImageModalIdx] = useState<number | null>(null);
     const [subeventImageTab, setSubeventImageTab] = useState<'upload' | 'library'>('upload');
 
-    // Preload Google Drive images in the background when the component mounts
-    useEffect(() => {
-        setDriveLoading(true);
-        fetch('/api/drive-images')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) setDriveImages(data.images);
-                else setDriveError(data.error || 'Failed to load images');
-            })
-            .catch(() => setDriveError('Failed to load images'))
-            .finally(() => setDriveLoading(false));
-    }, []);
-
     // Custom handler for slug changes to track when it's manually edited
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // If the field is being cleared, mark it as deliberately cleared
@@ -360,7 +360,7 @@ export default function EventForm({
             // Otherwise, track that user has manually edited the slug
             setSlugManuallyEdited(true);
         }
-        
+
         // Pass the change to the regular handler
         handleChange(e);
     };
