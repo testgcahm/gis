@@ -1,6 +1,6 @@
 'use client';
 
-import EventsManager from './EventsManager';
+import EventsManager from '../../components/admin/EventsManager';
 import { PublishType } from '@/types/publish';
 import PublishConfirmModal from '../../components/admin/publish/PublishConfirmModal';
 import PublishSuccessMessage from '../../components/admin/publish/PublishSuccessMessage';
@@ -11,8 +11,7 @@ import AdminAccessDenied from '../../components/admin/auth/AdminAccessDenied';
 import { SimpleSpinner } from '@/components/Spinner';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { DriveImage } from '@/types/googleDrive';
 
 interface AdminClientProps {
@@ -41,7 +40,6 @@ export default function AdminClient({ driveImages }: AdminClientProps) {
     const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
     const [publishType, setPublishType] = useState<PublishType | null>(null);
     const [publishLoading, setPublishLoading] = useState(false);
-    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -57,13 +55,12 @@ export default function AdminClient({ driveImages }: AdminClientProps) {
         }
     }, []);
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(() => {
-            setChecking(false);
-            setShowDropdown(false);
-        });
-        return () => unsubscribe();
-    }, []);
+    // useEffect(() => {
+    //     const unsubscribe = auth.onAuthStateChanged(() => {
+    //         setShowDropdown(false);
+    //     });
+    //     return () => unsubscribe();
+    // }, []);
 
     const handlePublishConfirm = async () => {
         setShowPublishConfirm(false);

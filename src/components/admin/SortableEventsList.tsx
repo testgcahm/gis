@@ -18,7 +18,7 @@ function EventItem({ event, onEdit, onDelete, onMoveUp, onMoveDown, isFirst, isL
         <div className="bg-white border border-primary-100 rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* Event info */}
             {/* Move up/down buttons */}
-            <div className="flex flex-col gap-1 mr-2">
+            <div className="flex flex-col max-sm:flex-row gap-1 mr-2">
                 <button
                     className={`px-2 py-1 rounded max-w-8 bg-primary-100 text-primary-700 font-bold shadow ${isFirst ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-200'}`}
                     onClick={() => onMoveUp(event)}

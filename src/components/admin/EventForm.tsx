@@ -1,30 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { EventData } from "@/components/events/types";
 import SpeakersSection from "./SpeakersSection";
-import SubeventsSection from "./SubeventsSection";
+import SubeventsSection from "./subevents/SubeventsSection";
 import { FolderType } from "@/types/googleDrive";
 import { SimpleSpinner } from "../Spinner";
 import { RefreshCcw } from "lucide-react";
 import { DriveImage } from '@/types/googleDrive';
-
-// Define a SubeventSpeaker interface with an id
-interface SubeventSpeaker {
-    name: string;
-    bio: string;
-    id: string;
-}
-
-// Update SubeventWithError to use SubeventSpeaker
-interface SubeventWithError {
-    time: string;
-    title: string;
-    description?: string;
-    imageUrl?: string;
-    speakers?: SubeventSpeaker[];
-    imageError?: string;
-    order?: number; // For drag-and-drop reordering
-    id: string; // Unique id for React key and dnd-kit
-}
 
 type EventFormProps = {
     form: Partial<EventData>;
@@ -55,10 +36,6 @@ export default function EventForm({
     handleCancel,
     driveImages: staticDriveImages,
 }: EventFormProps) {
-    // Store a stable reference to a counter for generating unique IDs
-    const idCounterRef = useRef(0);
-    // Create a stable ID generator function
-    const generateUniqueId = (prefix: string) => `${prefix}-${++idCounterRef.current}-${Math.random().toString(36).slice(2)}`;
 
     // Track whether the user has manually edited the slug
     const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -87,25 +64,6 @@ export default function EventForm({
 
         setSlugExists(!!duplicate);
     }, [form.slug, events, editing, form.id]);
-
-    // Ensure subevents and their speakers always have stable IDs
-    const normalizedSubevents = useMemo(() => {
-        return ((form.subevents as SubeventWithError[]) || []).map(sub => {
-            // Assume sub.id already exists and is stable
-            // Ensure speakers within the subevent also have stable IDs
-            const speakers = (sub.speakers || []).map((sp: SubeventSpeaker) => {
-                // Assume sp.id already exists and is stable
-                // If an ID is missing here, it's an issue with how speakers are added/managed
-                return { ...sp, id: sp.id };
-            });
-            // If sub.id is missing here, it's an issue with how subevents are added/managed
-            return { ...sub, id: sub.id, speakers };
-        });
-    }, [form.subevents]);
-
-    // Local state for subevent image uploading and errors
-    const [subeventUploading, setSubeventUploading] = useState<boolean[]>(Array(normalizedSubevents.length).fill(false));
-    const [subeventImageErrors, setSubeventImageErrors] = useState<string[]>(Array(normalizedSubevents.length).fill(""));
 
     // Main event image upload state
     const [mainImageUploading, setMainImageUploading] = useState(false);
@@ -140,130 +98,6 @@ export default function EventForm({
         setShowImageModal(false);
     };
 
-    const handleSelectSubeventImageFromLibrary = (idx: number, url: string) => {
-        const updated = [...normalizedSubevents];
-        updated[idx] = { ...updated[idx], imageUrl: url, imageError: '' };
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-        setShowSubeventImageModalIdx(null);
-    };
-
-    // Sync state arrays if subevents length changes
-    useEffect(() => {
-        setSubeventUploading(arr => arr.length === normalizedSubevents.length ? arr : Array(normalizedSubevents.length).fill(false));
-        setSubeventImageErrors(arr => arr.length === normalizedSubevents.length ? arr : Array(normalizedSubevents.length).fill(""));
-    }, [normalizedSubevents.length]);
-
-    // Dedicated handler for subevent image upload
-    const handleSubeventImageChange = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-        let updated = [...(form.subevents || [])] as SubeventWithError[];
-        if (!allowedTypes.includes(file.type)) {
-            updated[idx] = { ...updated[idx], imageError: 'Only PNG, JPG, and JPEG formats are supported.' };
-            setSubeventImageErrors(errors => {
-                const arr = [...errors]; arr[idx] = 'Only PNG, JPG, and JPEG formats are supported.'; return arr;
-            });
-            handleChange({ target: { name: 'subevents', value: updated } } as any);
-            return;
-        }
-        if (file.size > 250 * 1024) {
-            updated[idx] = { ...updated[idx], imageError: 'File size must be less than 250KB.' };
-            setSubeventImageErrors(errors => {
-                const arr = [...errors]; arr[idx] = 'File size must be less than 250KB.'; return arr;
-            });
-            handleChange({ target: { name: 'subevents', value: updated } } as any);
-            return;
-        }
-        setSubeventUploading(arr => { const copy = [...arr]; copy[idx] = true; return copy; });
-        setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = ''; return arr; });
-        updated[idx] = { ...updated[idx], imageUrl: 'uploading', imageError: '' };
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-        try {
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('folderType', FolderType.Events);
-            const res = await fetch('/api/image-upload', {
-                method: 'POST',
-                body: formData,
-            });
-            const data = await res.json();
-            updated = [...(form.subevents || [])] as SubeventWithError[];
-            if (data.success && data.url) {
-                updated[idx] = { ...updated[idx], imageUrl: data.url, imageError: '' };
-                setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = ''; return arr; });
-                // Refresh drive images after upload
-                await refreshDriveImages();
-            } else {
-                updated[idx] = { ...updated[idx], imageUrl: '', imageError: 'Image upload failed: ' + (data.error || 'Unknown error') };
-                setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = 'Image upload failed: ' + (data.error || 'Unknown error'); return arr; });
-            }
-        } catch (err) {
-            updated = [...(form.subevents || [])] as SubeventWithError[];
-            updated[idx] = { ...updated[idx], imageUrl: '', imageError: 'Image upload failed.' };
-            setSubeventImageErrors(errors => { const arr = [...errors]; arr[idx] = 'Image upload failed.'; return arr; });
-        }
-        setSubeventUploading(arr => { const copy = [...arr]; copy[idx] = false; return copy; });
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-    };
-    // Subevent state and handlers remain
-    // Subevent speaker handlers
-    const handleSubeventChange = (idx: number, field: string, value: unknown) => {
-        const updated = [...normalizedSubevents];
-        updated[idx] = { ...updated[idx], [field]: value };
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-    };
-    const handleAddSubevent = () => {
-        const newSubevent = {
-            time: '',
-            title: '',
-            description: '',
-            speakers: [],
-            id: generateUniqueId('subevent') // Generate ID *only* when adding
-        };
-        const updated = [
-            ...normalizedSubevents, // Use normalizedSubevents to ensure existing items have IDs
-            newSubevent
-        ];
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-    };
-    const handleRemoveSubevent = (idx: number) => {
-        const updated = [...normalizedSubevents]; // Use normalizedSubevents
-        updated.splice(idx, 1);
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-    };
-
-    const handleSubeventSpeakerChange = (subIdx: number, sIdx: number, field: "name" | "bio", value: string) => {
-        const updated = [...normalizedSubevents]; // Use normalizedSubevents
-        // Ensure speakers array exists and has stable IDs
-        const speakers = [...(updated[subIdx].speakers || [])];
-        if (speakers[sIdx]) { // Check if speaker exists at index
-            speakers[sIdx] = { ...speakers[sIdx], [field]: value };
-            updated[subIdx] = { ...updated[subIdx], speakers };
-            handleChange({ target: { name: 'subevents', value: updated } } as any);
-        }
-    };
-
-    const handleAddSubeventSpeaker = (subIdx: number) => {
-        const updated = [...normalizedSubevents]; // Use normalizedSubevents
-        const newSpeaker = { name: '', bio: '', id: generateUniqueId('speaker') }; // Generate ID *only* when adding
-        const speakers = [
-            ...(updated[subIdx].speakers || []),
-            newSpeaker
-        ];
-        updated[subIdx] = { ...updated[subIdx], speakers };
-        handleChange({ target: { name: 'subevents', value: updated } } as any);
-    };
-
-    const handleRemoveSubeventSpeaker = (subIdx: number, sIdx: number) => {
-        const updated = [...normalizedSubevents]; // Use normalizedSubevents
-        const speakers = [...(updated[subIdx].speakers || [])];
-        if (sIdx >= 0 && sIdx < speakers.length) { // Check index bounds
-            speakers.splice(sIdx, 1);
-            updated[subIdx] = { ...updated[subIdx], speakers };
-            handleChange({ target: { name: 'subevents', value: updated } } as any);
-        }
-    };
     // Main event image upload handler
     const handleMainImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -305,17 +139,6 @@ export default function EventForm({
         setMainImageUploading(false);
     };
 
-    // Handle subevent move up/down
-    const handleMoveSubevent = (fromIdx: number, toIdx: number) => {
-        if (toIdx < 0 || toIdx >= normalizedSubevents.length) return;
-        const updated = [...normalizedSubevents];
-        const [moved] = updated.splice(fromIdx, 1);
-        updated.splice(toIdx, 0, moved);
-        // Update order field if needed
-        const withOrder = updated.map((sub, i) => ({ ...sub, order: i }));
-        handleChange({ target: { name: 'subevents', value: withOrder } } as any);
-    };
-
     // Slug auto-update logic
     const prevTitle = useRef(form.title);
     React.useEffect(() => {
@@ -347,9 +170,6 @@ export default function EventForm({
     // Modal state for image selection
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageTab, setImageTab] = useState<'upload' | 'library'>('upload');
-    // Subevent image modal state
-    const [showSubeventImageModalIdx, setShowSubeventImageModalIdx] = useState<number | null>(null);
-    const [subeventImageTab, setSubeventImageTab] = useState<'upload' | 'library'>('upload');
 
     // Custom handler for slug changes to track when it's manually edited
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -465,7 +285,7 @@ export default function EventForm({
             {/* Modal for image selection */}
             {showImageModal && (
                 <div className="fixed inset-0 z-50 flex items-center h-screen justify-center bg-black/40">
-                    <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
+                    <div className="bg-white max-[510px]:px-2 max-[510px]:pt-10 max-[510px]:mx-1 rounded-lg p-6 max-w-lg w-full relative">
                         <button className="absolute top-2 right-2 text-xl" onClick={() => setShowImageModal(false)}>&times;</button>
                         <div className="flex gap-2 mb-4">
                             <button type="button" className={`px-3 py-1 rounded ${imageTab === 'upload' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setImageTab('upload')}>Upload from PC</button>
@@ -497,7 +317,33 @@ export default function EventForm({
                                 {!driveLoading && !driveError && driveImages.length === 0 && (
                                     <div className="text-gray-500 text-center py-8">No images found in your Google Drive folder.</div>
                                 )}
-                                <div className="grid grid-cols-3 max-[510px]:grid-cols-1 gap-3 max-h-72 overflow-y-auto p-1">
+                                <div className="flex justify-start mb-2">
+                                    <button
+                                        type="button"
+                                        className="px-3 py-1 font-semibold rounded bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
+                                        disabled={driveLoading}
+                                        onClick={async () => {
+                                            setDriveLoading(true);
+                                            setDriveError(null);
+                                            try {
+                                                const res = await fetch('/api/cleanup-unused', { method: 'POST' });
+                                                const data = await res.json();
+                                                if (data.success) {
+                                                    await refreshDriveImages();
+                                                    alert(`Deleted ${data.count} unused image(s).`);
+                                                } else {
+                                                    setDriveError(data.error || 'Failed to remove unused images');
+                                                }
+                                            } catch (err) {
+                                                setDriveError('Failed to remove unused images');
+                                            }
+                                            setDriveLoading(false);
+                                        }}
+                                    >
+                                        Remove unused images
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-3 max-[510px]:grid-cols-2 overflow-x-hidden gap-3 max-h-72 overflow-y-auto p-1">
                                     {driveImages.map(img => (
                                         <button
                                             key={img.id}
@@ -507,84 +353,6 @@ export default function EventForm({
                                                 ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)`
                                                 : `${img.name} (${img.sizeKB}KB)`}
                                             onClick={() => !img.isOverSizeLimit && handleSelectMainImageFromLibrary(img.url)}
-                                            disabled={img.isOverSizeLimit}
-                                        >
-                                            <div className="relative">
-                                                <img
-                                                    src={img.url}
-                                                    alt={img.name}
-                                                    className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
-                                                        ${img.isOverSizeLimit
-                                                            ? 'border-red-500 opacity-70'
-                                                            : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
-                                                />
-                                                {img.isOverSizeLimit && (
-                                                    <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
-                                                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">
-                                                            {img.sizeKB}KB (Too large)
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                <span className={`absolute bottom-1 left-1 right-1 bg-black/60 text-white text-xs rounded px-1 py-0.5 
-                                                    ${img.isOverSizeLimit ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus:opacity-100'} transition`}>
-                                                    {img.name} {img.sizeKB && `(${img.sizeKB}KB)`}
-                                                </span>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-            {/* Subevent image modal */}
-            {showSubeventImageModalIdx !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
-                        <button className="absolute top-2 right-2 text-xl" onClick={() => setShowSubeventImageModalIdx(null)}>&times;</button>
-                        <div className="flex gap-2 mb-4">
-                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab === 'upload' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setSubeventImageTab('upload')}>Upload from PC</button>
-                            <button type="button" className={`px-3 py-1 rounded ${subeventImageTab === 'library' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setSubeventImageTab('library')}>Select from Library</button>
-                        </div>
-                        {subeventImageTab === 'upload' && (
-                            <>
-                                <input
-                                    id="subevent-image-upload-modal"
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/jpg"
-                                    style={{ display: 'none' }}
-                                    onChange={async (e) => {
-                                        if (showSubeventImageModalIdx !== null) {
-                                            await handleSubeventImageChange(e, showSubeventImageModalIdx);
-                                            setShowSubeventImageModalIdx(null);
-                                        }
-                                    }}
-                                    disabled={showSubeventImageModalIdx !== null && subeventUploading[showSubeventImageModalIdx]}
-                                />
-                                <label htmlFor="subevent-image-upload-modal" className="w-full flex items-center justify-center px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
-                                    {showSubeventImageModalIdx !== null && subeventUploading[showSubeventImageModalIdx] ? <SimpleSpinner className='w-5 h-5' /> : 'Click to select image (jpg, jpeg, png)'}
-                                </label>
-                            </>
-                        )}
-                        {subeventImageTab === 'library' && (
-                            <div>
-                                <div className="font-bold text-lg mb-2 text-primary-700 text-center">Select an image from your library</div>
-                                {driveLoading && <div className="text-center py-6"><SimpleSpinner /></div>}
-                                {driveError && <div className="text-red-500 text-center py-4">{driveError}</div>}
-                                {!driveLoading && !driveError && driveImages.length === 0 && (
-                                    <div className="text-gray-500 text-center py-8">No images found in your Google Drive folder.</div>
-                                )}
-                                <div className="grid grid-cols-3 max-[510px]:grid-cols-1 gap-3 max-h-72 overflow-y-auto p-1">
-                                    {driveImages.map(img => (
-                                        <button
-                                            key={img.id}
-                                            type="button"
-                                            className="relative group focus:outline-none"
-                                            title={img.isOverSizeLimit
-                                                ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)`
-                                                : `${img.name} (${img.sizeKB}KB)`}
-                                            onClick={() => !img.isOverSizeLimit && handleSelectSubeventImageFromLibrary(showSubeventImageModalIdx, img.url)}
                                             disabled={img.isOverSizeLimit}
                                         >
                                             <div className="relative">
@@ -665,23 +433,10 @@ export default function EventForm({
                 handleRemoveSpeaker={handleRemoveSpeaker}
             />
             <SubeventsSection
-                subevents={normalizedSubevents}
-                subeventUploading={subeventUploading}
-                subeventImageErrors={subeventImageErrors}
-                handleSubeventImageChange={(e, idx) => {
-                    // Open modal instead of direct upload
-                    setShowSubeventImageModalIdx(idx);
-                }}
-                handleSubeventChange={handleSubeventChange}
-                handleAddSubevent={handleAddSubevent}
-                handleRemoveSubevent={handleRemoveSubevent}
-                handleSubeventSpeakerChange={handleSubeventSpeakerChange}
-                handleAddSubeventSpeaker={handleAddSubeventSpeaker}
-                handleRemoveSubeventSpeaker={handleRemoveSubeventSpeaker}
-                handleMoveSubevent={handleMoveSubevent}
+                form={form}
                 driveImages={driveImages}
-                driveLoading={driveLoading}
-                driveError={driveError}
+                handleChange={handleChange}
+                refreshDriveImages={refreshDriveImages}
             />
             <div className="flex gap-4 mt-2">
                 <button type="submit" className="w-full bg-primary cursor-pointer font-semibold text-white p-3 rounded-lg hover:bg-secondary hover:text-primary-900 hover:scale-[1.02] transition-all duration-300 shadow-md flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>{editing ? "Update" : "Add"} Event</button>
