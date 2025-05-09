@@ -1,18 +1,18 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import EventsManager from './EventsManager'
 import { auth, googleProvider } from '@/lib/firebase'
 import { signInWithPopup } from 'firebase/auth'
 import { SimpleSpinner } from '@/components/Spinner'
 import { motion } from 'framer-motion'
 import { PublishType } from '@/types/publish'
-import PublishConfirmModal from './PublishConfirmModal'
-import PublishSuccessMessage from './PublishSuccessMessage'
-import AuthProvider from './auth/AuthProvider';
-import ProfileDropdown from './auth/ProfileDropdown';
-import AdminActions from './AdminActions';
-import AdminAccessDenied from './AdminAccessDenied';
+import PublishConfirmModal from '../../components/admin/publish/PublishConfirmModal'
+import PublishSuccessMessage from '../../components/admin/publish/PublishSuccessMessage'
+import AuthProvider from '../../components/admin/auth/AuthProvider';
+import ProfileDropdown from '../../components/admin/auth/ProfileDropdown';
+import AdminActions from '../../components/admin/publish/AdminActions';
+import AdminAccessDenied from '../../components/admin/auth/AdminAccessDenied';
 
 let ALLOWED_EMAILS = [
     'abidahmed094@gmail.com',
