@@ -6,6 +6,7 @@ import { FolderType } from "@/types/googleDrive";
 import { SimpleSpinner } from "../Spinner";
 import { RefreshCcw } from "lucide-react";
 import { DriveImage } from '@/types/googleDrive';
+import Image from "next/image";
 
 type EventFormProps = {
     form: Partial<EventData>;
@@ -268,7 +269,7 @@ export default function EventForm({
                     <span>{form.image && form.image !== 'uploading' ? 'Change Image' : 'Click to select image (jpg, jpeg, png)'}</span>
                 </div>
                 {form.image && form.image !== 'uploading' && (
-                    <img src={form.image} title="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
+                    <Image src={form.image} alt={form.title || ''} title="Event" width={96} height={96} className="mt-2 rounded" />
                 )}
                 <p className="text-xs text-gray-600 mt-1">
                     Max size: 250KB. Supported formats: jpg, jpeg, png
@@ -356,10 +357,12 @@ export default function EventForm({
                                             disabled={img.isOverSizeLimit}
                                         >
                                             <div className="relative">
-                                                <img
+                                                <Image
                                                     src={img.url}
                                                     alt={img.name}
-                                                    className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
+                                                    height={96}
+                                                    width={96}
+                                                    className={`rounded border-2 transition-all shadow-sm h-24 w-full object-cover bg-white
                                                         ${img.isOverSizeLimit
                                                             ? 'border-red-500 opacity-70'
                                                             : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}

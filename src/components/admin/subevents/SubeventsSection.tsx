@@ -4,6 +4,7 @@ import { SimpleSpinner } from "../../Spinner";
 import SubeventSpeakersSection from "./SubeventSpeakersSection";
 import { EventData } from "@/components/events/types";
 import { FolderType } from "@/types/googleDrive";
+import Image from "next/image";
 
 // Define a SubeventSpeaker interface with an id
 interface SubeventSpeaker {
@@ -175,7 +176,7 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
         updated[idx] = { ...updated[idx], [field]: value };
         handleChange({ target: { name: 'subevents', value: updated } } as any);
     };
-    
+
     const handleAddSubevent = () => {
         const newSubevent = {
             time: '',
@@ -263,7 +264,7 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                                 <span>{sub.imageUrl && sub.imageUrl !== 'uploading' ? 'Change Image' : 'Click to select image (jpg, jpeg, png)'}</span>
                             </div>
                             {sub.imageUrl && sub.imageUrl !== 'uploading' && (
-                                <img src={sub.imageUrl} title="Event" className="mt-2 max-h-24 max-w-24 rounded w-full" />
+                                <Image alt={sub.title} width={96} height={96} src={sub.imageUrl} title="Event" className="mt-2 rounded" />
                             )}
                             <p className="text-xs text-gray-600 mt-1">
                                 Max size: 250KB. Supported formats: jpg, jpeg, png
@@ -367,9 +368,11 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                                                         disabled={img.isOverSizeLimit}
                                                     >
                                                         <div className="relative">
-                                                            <img
+                                                            <Image
                                                                 src={img.url}
                                                                 alt={img.name}
+                                                                width={96}
+                                                                height={96}
                                                                 className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
                                                                     ${img.isOverSizeLimit
                                                                         ? 'border-red-500 opacity-70'
@@ -395,110 +398,7 @@ const SubeventsSection: React.FC<SubeventsSectionProps> = ({
                                 </div>
                             </div>
                         )}
-                        {/* Subevent image modal */}
-                        {showSubeventImageModalIdx !== null && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                                <div className="bg-white max-[510px]:px-2 max-[510px]:pt-10 max-[510px]:mx-1 rounded-lg p-6 max-w-lg w-full relative">
-                                    <button className="absolute top-2 right-2 text-xl" onClick={() => setShowSubeventImageModalIdx(null)}>&times;</button>
-                                    <div className="flex gap-2 mb-4">
-                                        <button type="button" className={`px-3 py-1 rounded ${subeventImageTab === 'upload' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setSubeventImageTab('upload')}>Upload from PC</button>
-                                        <button type="button" className={`px-3 py-1 rounded ${subeventImageTab === 'library' ? 'bg-primary text-white' : 'bg-gray-200 text-primary'}`} onClick={() => setSubeventImageTab('library')}>Select from Library</button>
-                                    </div>
-                                    {subeventImageTab === 'upload' && (
-                                        <>
-                                            <input
-                                                id="subevent-image-upload-modal"
-                                                type="file"
-                                                accept="image/png,image/jpeg,image/jpg"
-                                                style={{ display: 'none' }}
-                                                onChange={async (e) => {
-                                                    if (showSubeventImageModalIdx !== null) {
-                                                        await handleSubeventImageChange(e, showSubeventImageModalIdx);
-                                                        setShowSubeventImageModalIdx(null);
-                                                    }
-                                                }}
-                                                disabled={showSubeventImageModalIdx !== null && subeventUploading[showSubeventImageModalIdx]}
-                                            />
-                                            <label htmlFor="subevent-image-upload-modal" className="w-full flex items-center justify-center px-4 py-3 bg-white border rounded-lg cursor-pointer focus:outline-none transition-all duration-300 focus:ring-1 border-gray-300 focus:ring-[#6d4aff] hover:border-[#6d4aff]/50 text-gray-500">
-                                                {showSubeventImageModalIdx !== null && subeventUploading[showSubeventImageModalIdx] ? <SimpleSpinner className='w-5 h-5' /> : 'Click to select image (jpg, jpeg, png)'}
-                                            </label>
-                                        </>
-                                    )}
-                                    {subeventImageTab === 'library' && (
-                                        <div>
-                                            <div className="font-bold text-lg mb-2 text-primary-700 text-center">Select an image from your library</div>
-                                            {driveLoading && <div className="text-center py-6"><SimpleSpinner /></div>}
-                                            {driveError && <div className="text-red-500 text-center py-4">{driveError}</div>}
-                                            {!driveLoading && !driveError && driveImages.length === 0 && (
-                                                <div className="text-gray-500 text-center py-8">No images found in your Google Drive folder.</div>
-                                            )}
-                                            <div className="flex justify-start mb-2">
-                                                <button
-                                                    type="button"
-                                                    className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
-                                                    disabled={driveLoading}
-                                                    onClick={async () => {
-                                                        if (setDriveLoading) setDriveLoading(true);
-                                                        if (setDriveError) setDriveError(null);
-                                                        try {
-                                                            const res = await fetch('/api/cleanup-unused', { method: 'POST' });
-                                                            const data = await res.json();
-                                                            if (data.success) {
-                                                                if (refreshDriveImages) await refreshDriveImages();
-                                                                alert(`Deleted ${data.count} unused image(s).`);
-                                                            } else {
-                                                                if (setDriveError) setDriveError(data.error || 'Failed to remove unused images');
-                                                            }
-                                                        } catch (err) {
-                                                            if (setDriveError) setDriveError('Failed to remove unused images');
-                                                        }
-                                                        if (setDriveLoading) setDriveLoading(false);
-                                                    }}
-                                                >
-                                                    Remove unused images
-                                                </button>
-                                            </div>
-                                            <div className="grid grid-cols-3 max-[510px]:grid-cols-2 overflow-x-hidden gap-3 max-h-72 overflow-y-auto p-1">
-                                                {driveImages.map(img => (
-                                                    <button
-                                                        key={img.id}
-                                                        type="button"
-                                                        className="relative group focus:outline-none"
-                                                        title={img.isOverSizeLimit
-                                                            ? `${img.name} (${img.sizeKB}KB - Too large, max size is 250KB)`
-                                                            : `${img.name} (${img.sizeKB}KB)`}
-                                                        onClick={() => !img.isOverSizeLimit && handleSelectSubeventImageFromLibrary(showSubeventImageModalIdx, img.url)}
-                                                        disabled={img.isOverSizeLimit}
-                                                    >
-                                                        <div className="relative">
-                                                            <img
-                                                                src={img.url}
-                                                                alt={img.name}
-                                                                className={`rounded border-2 transition-all shadow-sm w-full h-24 object-cover bg-white
-                                                        ${img.isOverSizeLimit
-                                                                        ? 'border-red-500 opacity-70'
-                                                                        : 'border-transparent group-hover:border-primary-500 group-focus:border-primary-600'}`}
-                                                            />
-                                                            {img.isOverSizeLimit && (
-                                                                <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
-                                                                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">
-                                                                        {img.sizeKB}KB (Too large)
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                            <span className={`absolute bottom-1 left-1 right-1 bg-black/60 text-white text-xs rounded px-1 py-0.5 
-                                                    ${img.isOverSizeLimit ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus:opacity-100'} transition`}>
-                                                                {img.name} {img.sizeKB && `(${img.sizeKB}KB)`}
-                                                            </span>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+
                         <textarea
                             value={sub.description || ""}
                             onChange={e => handleSubeventChange(idx, "description", e.target.value)}
