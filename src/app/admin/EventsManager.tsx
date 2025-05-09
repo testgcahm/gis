@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { EventData } from "@/components/events/types";
 import { motion } from "framer-motion";
-import DraggableEventsList from "@/components/admin/SortableEventsList";
+import SortableEventsList from "@/components/admin/SortableEventsList";
 import EventForm from "@/components/admin/EventForm";
 import { emptyEvent } from "@/components/admin/types";
 import { getAuth } from 'firebase/auth';
@@ -313,7 +313,7 @@ export default function EventsManager() {
                 <Spinner />
             ) :
                 /* Draggable Events List Component */
-                <DraggableEventsList
+                <SortableEventsList
                     events={events}
                     loading={loading}
                     orderChanged={orderChanged}

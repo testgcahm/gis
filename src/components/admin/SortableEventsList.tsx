@@ -54,7 +54,7 @@ function EventItem({ event, onEdit, onDelete, onMoveUp, onMoveDown, isFirst, isL
     );
 }
 
-type DraggableEventsListProps = {
+type SortableEventsListProps = {
     events: EventData[];
     loading: boolean;
     orderChanged: boolean;
@@ -65,7 +65,7 @@ type DraggableEventsListProps = {
     handleSaveOrder: () => void;
 };
 
-export default function DraggableEventsList({
+export default function SortableEventsList({
     events,
     loading,
     orderChanged,
@@ -74,15 +74,12 @@ export default function DraggableEventsList({
     handleMoveUp,
     handleMoveDown,
     handleSaveOrder,
-}: DraggableEventsListProps) {
+}: SortableEventsListProps) {
     // Always sort events by their 'order' property before rendering
     const sortedEvents = [...events].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     return (
         <div className="w-full max-w-4xl">
             <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-4">All Events
-                {orderChanged && (
-                    <button onClick={handleSaveOrder} className="ml-4 text-base bg-primary-600 hover:bg-primary-700 text-white font-bold px-2 py-1 rounded shadow transition-all">Save Order</button>
-                )}
             </h2>
             {loading ? <div className="text-primary-700 pl-20 pt-10"><Spinner /></div> : (
                 <div className="grid gap-6">
@@ -100,6 +97,9 @@ export default function DraggableEventsList({
                         />
                     ))}
                 </div>
+            )}
+            {orderChanged && (
+                <div className="flex my-4 justify-center items-center"><button onClick={handleSaveOrder} className="ml-4 text-base bg-primary-600 hover:bg-primary-700 text-white font-bold px-2 py-1 rounded shadow transition-all">Save Order</button></div>
             )}
         </div>
     );
