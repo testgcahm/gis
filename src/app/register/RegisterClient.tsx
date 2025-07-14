@@ -192,7 +192,7 @@ const RegisterClient: React.FC = () => {
                         <h2 className="text-2xl md:text-3xl font-extrabold text-primary mb-3 drop-shadow-sm">Welcome to Islamic Fiesta'2025</h2>
                         <p className="text-lg text-gray-700 mb-4 font-medium">An inspiring event dedicated to learning, unity, and spiritual growth for the GMC community and beyond.</p>
                         <div className="my-2">
-                            <span className="inline-block bg-secondary text-primary-900 font-semibold px-4 py-1 rounded-full text-base mb-2">June 30th, 2025 &middot; GMCTH Auditorium</span>
+                            <span className="inline-block bg-secondary text-primary-900 font-semibold px-4 py-1 rounded-full text-base mb-2">July 30th, 2025 &middot; GMCTH Auditorium</span>
                         </div>
                         <p className="text-base text-primary-700 mb-2">Engage with renowned speakers, connect with peers, and be part of a memorable experience.</p>
                     </motion.div>
