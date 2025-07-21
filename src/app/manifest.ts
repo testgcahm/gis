@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'GMC Islamic Society',
-    short_name: 'GMC Islamic Society',
+    short_name: 'GIS',
     description: 'A Progressive Web App for GMC Islamic Society at Gujranwala Medical College',
     start_url: '/',
     display: 'standalone',
